@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.4](https://github.com/bradford-tech/rivian-sdk/compare/rivian-sdk-v0.0.3...rivian-sdk-v0.0.4) (2026-03-05)
+
+
+### Bug Fixes
+
+* **release:** remove registry-url to allow OIDC auth ([20d833b](https://github.com/bradford-tech/rivian-sdk/commit/20d833bb57c3f10080cb65b2f0c5dc466abc0d93))
+
 ## [0.0.3](https://github.com/bradford-tech/rivian-sdk/compare/rivian-sdk-v0.0.2...rivian-sdk-v0.0.3) (2026-03-05)
 
 
