@@ -1,0 +1,20 @@
+{
+  "name": "rivian-sdk",
+  "version": "1.0.0",
+  "description": "Unofficial TypeScript SDK for the Rivian API",
+  "homepage": "https://github.com/bradford-tech/rivian-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/bradford-tech/rivian-sdk/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bradford-tech/rivian-sdk.git"
+  },
+  "license": "MIT",
+  "author": "sbs44",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
