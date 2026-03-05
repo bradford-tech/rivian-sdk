@@ -1,7 +1,7 @@
+import type { Client } from "./client/client/index.js";
 import { Authentication } from "./client/sdk.gen.js";
 import { STORAGE_KEY } from "./storage.js";
 import type { LoginResult, RivianStorage, RivianTokens } from "./types.js";
-import type { Client } from "./client/client/index.js";
 
 export class RivianAuth {
   private tokens: Partial<RivianTokens> = {};
@@ -143,8 +143,8 @@ export class RivianAuth {
   get isAuthenticated(): boolean {
     return Boolean(
       this.tokens.csrfToken &&
-        this.tokens.appSessionToken &&
-        this.tokens.userSessionToken,
+      this.tokens.appSessionToken &&
+      this.tokens.userSessionToken,
     );
   }
 

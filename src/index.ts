@@ -1,3 +1,4 @@
+import { RivianAuth } from "./auth.js";
 import { client } from "./client/client.gen.js";
 import {
   Account,
@@ -8,7 +9,6 @@ import {
   VehicleControls,
   VehicleInfo,
 } from "./client/sdk.gen.js";
-import { RivianAuth } from "./auth.js";
 import { InMemoryStorage } from "./storage.js";
 import type { ClientConfig } from "./types.js";
 
@@ -23,7 +23,9 @@ export interface RivianClient {
   readonly vehicleInfo: typeof VehicleInfo;
 }
 
-export async function createClient(config?: ClientConfig): Promise<RivianClient> {
+export async function createClient(
+  config?: ClientConfig,
+): Promise<RivianClient> {
   const storage = config?.auth?.storage ?? new InMemoryStorage();
 
   const auth = new RivianAuth(client, storage);
@@ -55,5 +57,10 @@ export async function createClient(config?: ClientConfig): Promise<RivianClient>
   };
 }
 
-export type { ClientConfig, LoginResult, RivianStorage, RivianTokens } from "./types.js";
 export type * from "./client/types.gen.js";
+export type {
+  ClientConfig,
+  LoginResult,
+  RivianStorage,
+  RivianTokens,
+} from "./types.js";
