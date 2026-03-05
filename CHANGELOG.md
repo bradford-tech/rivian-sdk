@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.6](https://github.com/bradford-tech/rivian-sdk/compare/rivian-sdk-v0.0.5...rivian-sdk-v0.0.6) (2026-03-05)
+
+
+### Bug Fixes
+
+* correct GraphQL queries and spec for 16 endpoints ([187a318](https://github.com/bradford-tech/rivian-sdk/commit/187a3189c29c9dde5c2bf7e2d0b81b2a73da9bf0))
+
 ## [0.0.5](https://github.com/bradford-tech/rivian-sdk/compare/rivian-sdk-v0.0.4...rivian-sdk-v0.0.5) (2026-03-05)
 
 
