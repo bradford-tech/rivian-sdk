@@ -306,7 +306,7 @@ export const zUserVehicle = z.object({
     settings: z.object({
         name: z.object({
             value: z.string().nullish()
-        }).optional()
+        }).nullish()
     }).optional()
 });
 
@@ -316,7 +316,7 @@ export const zUserInfo = z.object({
     firstName: z.string().optional(),
     lastName: z.string().optional(),
     email: z.string().optional(),
-    address: zUserAddress.optional(),
+    address: zUserAddress.nullish(),
     vehicles: z.array(zUserVehicle).optional(),
     enrolledPhones: z.array(zEnrolledPhone).optional(),
     pendingInvites: z.array(zPendingInvite).optional()
@@ -1627,8 +1627,8 @@ export const zGetEstimatedRangeData = z.object({
     path: z.never().optional(),
     query: z.never().optional(),
     headers: z.object({
-        'dc-cid': z.string()
-    })
+        'dc-cid': z.string().optional()
+    }).optional()
 });
 
 /**
@@ -1950,10 +1950,10 @@ export const zSearchShopProductsBySkusData = z.object({
     path: z.never().optional(),
     query: z.never().optional(),
     headers: z.object({
-        'csrf-token': z.string(),
-        'dc-cid': z.string(),
-        'x-datadog-origin': z.string()
-    })
+        'csrf-token': z.string().optional(),
+        'dc-cid': z.string().optional(),
+        'x-datadog-origin': z.string().optional()
+    }).optional()
 });
 
 /**
@@ -2009,10 +2009,10 @@ export const zSearchShopPricingBySkuData = z.object({
     path: z.never().optional(),
     query: z.never().optional(),
     headers: z.object({
-        'csrf-token': z.string(),
-        'dc-cid': z.string(),
-        'x-datadog-origin': z.string()
-    })
+        'csrf-token': z.string().optional(),
+        'dc-cid': z.string().optional(),
+        'x-datadog-origin': z.string().optional()
+    }).optional()
 });
 
 /**

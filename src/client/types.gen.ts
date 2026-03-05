@@ -57,7 +57,7 @@ export type UserInfo = {
     firstName?: string;
     lastName?: string;
     email?: string;
-    address?: UserAddress;
+    address?: UserAddress | null;
     vehicles?: Array<UserVehicle>;
     enrolledPhones?: Array<EnrolledPhone>;
     pendingInvites?: Array<PendingInvite>;
@@ -90,7 +90,7 @@ export type UserVehicle = {
     settings?: {
         name?: {
             value?: string | null;
-        };
+        } | null;
     };
 };
 
@@ -1814,8 +1814,8 @@ export type GetEstimatedRangeData = {
         };
         query?: string;
     };
-    headers: {
-        'dc-cid': string;
+    headers?: {
+        'dc-cid'?: string;
     };
     path?: never;
     query?: never;
@@ -2196,10 +2196,10 @@ export type SearchShopProductsBySkusData = {
         };
         query?: string;
     };
-    headers: {
-        'csrf-token': string;
-        'dc-cid': string;
-        'x-datadog-origin': string;
+    headers?: {
+        'csrf-token'?: string;
+        'dc-cid'?: string;
+        'x-datadog-origin'?: string;
     };
     path?: never;
     query?: never;
@@ -2262,10 +2262,10 @@ export type SearchShopPricingBySkuData = {
         };
         query?: string;
     };
-    headers: {
-        'csrf-token': string;
-        'dc-cid': string;
-        'x-datadog-origin': string;
+    headers?: {
+        'csrf-token'?: string;
+        'dc-cid'?: string;
+        'x-datadog-origin'?: string;
     };
     path?: never;
     query?: never;

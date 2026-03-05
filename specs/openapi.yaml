@@ -146,7 +146,9 @@ components:
         email:
           type: string
         address:
-          $ref: "#/components/schemas/UserAddress"
+          oneOf:
+            - $ref: "#/components/schemas/UserAddress"
+            - type: "null"
         vehicles:
           type: array
           items:
@@ -216,10 +218,12 @@ components:
           type: object
           properties:
             name:
-              type: object
-              properties:
-                value:
-                  type: [string, "null"]
+              oneOf:
+                - type: object
+                  properties:
+                    value:
+                      type: [string, "null"]
+                - type: "null"
 
     VehicleDetails:
       type: object
@@ -3255,7 +3259,6 @@ paths:
       parameters:
         - name: dc-cid
           in: header
-          required: true
           schema:
             type: string
             example: m-android
@@ -3932,17 +3935,14 @@ paths:
       parameters:
         - name: csrf-token
           in: header
-          required: true
           schema:
             type: string
         - name: dc-cid
           in: header
-          required: true
           schema:
             type: string
         - name: x-datadog-origin
           in: header
-          required: true
           schema:
             type: string
             example: rum
@@ -4057,17 +4057,14 @@ paths:
       parameters:
         - name: csrf-token
           in: header
-          required: true
           schema:
             type: string
         - name: dc-cid
           in: header
-          required: true
           schema:
             type: string
         - name: x-datadog-origin
           in: header
-          required: true
           schema:
             type: string
             example: rum
