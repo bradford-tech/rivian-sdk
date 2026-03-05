@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.7](https://github.com/bradford-tech/rivian-sdk/compare/rivian-sdk-v0.0.6...rivian-sdk-v0.0.7) (2026-03-05)
+
+
+### Bug Fixes
+
+* drop zod and ofetch runtime dependencies ([bd4a10c](https://github.com/bradford-tech/rivian-sdk/commit/bd4a10c9ad925b5437dbb96248da775ba7c97520))
+
 ## [0.0.6](https://github.com/bradford-tech/rivian-sdk/compare/rivian-sdk-v0.0.5...rivian-sdk-v0.0.6) (2026-03-05)
 
 

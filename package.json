@@ -1,6 +1,6 @@
 {
   "name": "@bradford-tech/rivian-sdk",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Unofficial TypeScript SDK for the Unofficial Rivian API",
   "homepage": "https://github.com/bradford-tech/rivian-sdk#readme",
   "bugs": {
