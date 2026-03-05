@@ -1,0 +1,4192 @@
+openapi: 3.1.0
+info:
+  title: Unofficial Rivian API
+  description: |
+    Unofficial documentation of the Rivian API used by the Rivian mobile app.
+    **WARNING:** This information is not maintained by Rivian and things could change or break at any moment.
+    Most Rivian web APIs use GraphQL.
+  version: 1.0.0
+  contact:
+    url: https://rivian-api.kaedenb.org
+
+servers:
+  - url: https://rivian.com/api/gql
+    description: Rivian GraphQL API
+  - url: https://media.rivian.com
+    description: Rivian Configurator Media API
+  - url: wss://api.rivian.com
+    description: Rivian WebSocket API (Subscriptions)
+
+tags:
+  - name: Authentication
+    description: CSRF token and login endpoints
+  - name: Account
+    description: Account and order information
+  - name: Charging
+    description: Charging sessions and wallbox management
+  - name: Vehicle Controls
+    description: Lock, unlock, and send commands to the vehicle
+  - name: Vehicle Info
+    description: Vehicle state, images, OTA updates
+  - name: Trip Planning
+    description: Plan and save trips
+  - name: Gear Shop
+    description: Product search and pricing
+  - name: Configurator
+    description: Vehicle configuration image generation
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: header
+      name: a-sess
+      description: App session token
+    userSessionAuth:
+      type: apiKey
+      in: header
+      name: u-sess
+      description: User session token
+    csrfToken:
+      type: apiKey
+      in: header
+      name: csrf-token
+      description: CSRF token
+
+  schemas:
+    GraphQLRequest:
+      type: object
+      required:
+        - operationName
+        - query
+      properties:
+        operationName:
+          type: string
+        variables:
+          type: object
+        query:
+          type: string
+
+    GraphQLResponse:
+      type: object
+      properties:
+        data:
+          type: object
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+
+    CreateCSRFTokenResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            createCsrfToken:
+              type: object
+              properties:
+                __typename:
+                  type: string
+                  example: CreateCsrfTokenResponse
+                csrfToken:
+                  type: string
+                appSessionToken:
+                  type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            loginWithOTP:
+              type: object
+              properties:
+                __typename:
+                  type: string
+                  example: MobileLoginResponse
+                accessToken:
+                  type: string
+                refreshToken:
+                  type: string
+                userSessionToken:
+                  type: string
+
+    MFALoginResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            login:
+              type: object
+              properties:
+                __typename:
+                  type: string
+                  example: MobileMFALoginResponse
+                otpToken:
+                  type: string
+
+    UserInfo:
+      type: object
+      properties:
+        __typename:
+          type: string
+          example: User
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        address:
+          $ref: "#/components/schemas/UserAddress"
+        vehicles:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserVehicle"
+        enrolledPhones:
+          type: array
+          items:
+            $ref: "#/components/schemas/EnrolledPhone"
+        pendingInvites:
+          type: array
+          items:
+            $ref: "#/components/schemas/PendingInvite"
+
+    UserAddress:
+      type: object
+      properties:
+        __typename:
+          type: string
+        id:
+          type: string
+        types:
+          type: array
+          items:
+            type: string
+            enum: [PRIMARY, SHIPPING]
+        line1:
+          type: string
+        line2:
+          type: [string, "null"]
+        city:
+          type: string
+        state:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+
+    UserVehicle:
+      type: object
+      properties:
+        __typename:
+          type: string
+          example: UserVehicle
+        id:
+          type: string
+        name:
+          type: [string, "null"]
+        owner:
+          type: [string, "null"]
+        roles:
+          type: array
+          items:
+            type: string
+        vin:
+          type: string
+        vas:
+          type: object
+          properties:
+            vasVehicleId:
+              type: string
+            vehiclePublicKey:
+              type: string
+        vehicle:
+          $ref: "#/components/schemas/VehicleDetails"
+        settings:
+          type: object
+          properties:
+            name:
+              type: object
+              properties:
+                value:
+                  type: [string, "null"]
+
+    VehicleDetails:
+      type: object
+      properties:
+        __typename:
+          type: string
+        model:
+          type: string
+          enum: [R1T, R1S]
+        modelYear:
+          type: integer
+        mobileConfiguration:
+          $ref: "#/components/schemas/MobileConfiguration"
+        deviceSlots:
+          type: object
+          properties:
+            phone:
+              type: object
+              properties:
+                max:
+                  type: integer
+                free:
+                  type: integer
+        cccCapable:
+          type: boolean
+        cccReady:
+          type: boolean
+        cccEnabled:
+          type: boolean
+        legacyEnabled:
+          type: boolean
+        otaEarlyAccessStatus:
+          type: boolean
+        vehicleState:
+          $ref: "#/components/schemas/VehicleState"
+        maintenanceSchedule:
+          $ref: "#/components/schemas/MaintenanceSchedule"
+
+    MobileConfiguration:
+      type: object
+      properties:
+        __typename:
+          type: string
+        trimOption:
+          $ref: "#/components/schemas/ConfigOption"
+        exteriorColorOption:
+          $ref: "#/components/schemas/ConfigOption"
+        interiorColorOption:
+          $ref: "#/components/schemas/ConfigOption"
+        driveSystemOption:
+          $ref: "#/components/schemas/ConfigOption"
+        tonneauOption:
+          oneOf:
+            - $ref: "#/components/schemas/ConfigOption"
+            - type: "null"
+        wheelOption:
+          $ref: "#/components/schemas/ConfigOption"
+        driveSystemDriveModes:
+          type: array
+          items:
+            type: string
+        driveSystemTowingDriveModes:
+          type: array
+          items:
+            type: string
+        maxVehiclePower:
+          type: number
+        chargePort:
+          type: string
+          enum: [CCS, J1772]
+
+    ConfigOption:
+      type: object
+      properties:
+        __typename:
+          type: string
+        optionId:
+          type: string
+        optionName:
+          type: string
+
+    MaintenanceSchedule:
+      type: object
+      properties:
+        sections:
+          type: array
+          items:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    description:
+                      type: string
+                    isDue:
+                      type: [boolean, "null"]
+              serviceLifetime:
+                oneOf:
+                  - type: object
+                    properties:
+                      __typename:
+                        type: string
+                        example: MaintenanceDistanceLimit
+                      km:
+                        type: integer
+                      mi:
+                        type: integer
+                  - type: object
+                    properties:
+                      __typename:
+                        type: string
+                        example: MaintenanceDateLimit
+                      year:
+                        type: integer
+
+    EnrolledPhone:
+      type: object
+      properties:
+        vas:
+          type: object
+          properties:
+            vasPhoneId:
+              type: string
+            publicKey:
+              type: string
+        enrolled:
+          type: array
+          items:
+            type: object
+            properties:
+              deviceType:
+                type: string
+              deviceName:
+                type: string
+              vehicleId:
+                type: string
+              identityId:
+                type: string
+              shortName:
+                type: string
+
+    PendingInvite:
+      type: object
+      properties:
+        id:
+          type: string
+        invitedByFirstName:
+          type: string
+        role:
+          type: string
+        status:
+          type: string
+        vehicleId:
+          type: string
+        vehicleModel:
+          type: string
+        email:
+          type: string
+
+    VehicleState:
+      type: object
+      properties:
+        __typename:
+          type: string
+          example: VehicleState
+        gnssLocation:
+          type: [object, "null"]
+          properties:
+            latitude:
+              type: number
+            longitude:
+              type: number
+            timeStamp:
+              type: string
+              format: date-time
+            isAuthorized:
+              type: boolean
+        gnssSpeed:
+          $ref: "#/components/schemas/TimestampedValue"
+        gnssAltitude:
+          $ref: "#/components/schemas/TimestampedValue"
+        gnssError:
+          type: [object, "null"]
+          properties:
+            timeStamp:
+              type: string
+              format: date-time
+            positionVertical:
+              type: number
+            positionHorizontal:
+              type: number
+            speed:
+              type: number
+            bearing:
+              type: number
+        alarmSoundStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        timeToEndOfCharge:
+          $ref: "#/components/schemas/TimestampedValue"
+        doorFrontLeftLocked:
+          $ref: "#/components/schemas/TimestampedValue"
+        doorFrontLeftClosed:
+          $ref: "#/components/schemas/TimestampedValue"
+        doorFrontRightLocked:
+          $ref: "#/components/schemas/TimestampedValue"
+        doorFrontRightClosed:
+          $ref: "#/components/schemas/TimestampedValue"
+        doorRearLeftLocked:
+          $ref: "#/components/schemas/TimestampedValue"
+        doorRearLeftClosed:
+          $ref: "#/components/schemas/TimestampedValue"
+        doorRearRightLocked:
+          $ref: "#/components/schemas/TimestampedValue"
+        doorRearRightClosed:
+          $ref: "#/components/schemas/TimestampedValue"
+        windowFrontLeftClosed:
+          $ref: "#/components/schemas/TimestampedValue"
+        windowFrontRightClosed:
+          $ref: "#/components/schemas/TimestampedValue"
+        windowFrontLeftCalibrated:
+          $ref: "#/components/schemas/TimestampedValue"
+        windowFrontRightCalibrated:
+          $ref: "#/components/schemas/TimestampedValue"
+        windowRearLeftCalibrated:
+          $ref: "#/components/schemas/TimestampedValue"
+        windowRearRightCalibrated:
+          $ref: "#/components/schemas/TimestampedValue"
+        windowRearLeftClosed:
+          $ref: "#/components/schemas/TimestampedValue"
+        windowRearRightClosed:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureFrunkLocked:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureFrunkClosed:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureFrunkNextAction:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureLiftgateLocked:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureLiftgateClosed:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureLiftgateNextAction:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureSideBinLeftLocked:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureSideBinLeftClosed:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureSideBinRightLocked:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureSideBinLeftNextAction:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureSideBinRightClosed:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureSideBinRightNextAction:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureTailgateLocked:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureTailgateClosed:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureTailgateNextAction:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureTonneauLocked:
+          $ref: "#/components/schemas/TimestampedValue"
+        closureTonneauClosed:
+          $ref: "#/components/schemas/TimestampedValue"
+        gearGuardLocked:
+          $ref: "#/components/schemas/TimestampedValue"
+        wiperFluidState:
+          $ref: "#/components/schemas/TimestampedValue"
+        powerState:
+          $ref: "#/components/schemas/TimestampedValue"
+        batteryHvThermalEventPropagation:
+          $ref: "#/components/schemas/TimestampedValue"
+        twelveVoltBatteryHealth:
+          $ref: "#/components/schemas/TimestampedValue"
+        vehicleMileage:
+          $ref: "#/components/schemas/TimestampedValue"
+        brakeFluidLow:
+          $ref: "#/components/schemas/TimestampedValue"
+        gearStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        tirePressureStatusFrontLeft:
+          $ref: "#/components/schemas/TimestampedValue"
+        tirePressureStatusValidFrontLeft:
+          $ref: "#/components/schemas/TimestampedValue"
+        tirePressureStatusFrontRight:
+          $ref: "#/components/schemas/TimestampedValue"
+        tirePressureStatusValidFrontRight:
+          $ref: "#/components/schemas/TimestampedValue"
+        tirePressureStatusRearLeft:
+          $ref: "#/components/schemas/TimestampedValue"
+        tirePressureStatusValidRearLeft:
+          $ref: "#/components/schemas/TimestampedValue"
+        tirePressureStatusRearRight:
+          $ref: "#/components/schemas/TimestampedValue"
+        tirePressureStatusValidRearRight:
+          $ref: "#/components/schemas/TimestampedValue"
+        batteryLevel:
+          $ref: "#/components/schemas/TimestampedValue"
+        chargerState:
+          $ref: "#/components/schemas/TimestampedValue"
+        batteryLimit:
+          $ref: "#/components/schemas/TimestampedValue"
+        remoteChargingAvailable:
+          $ref: "#/components/schemas/TimestampedValue"
+        batteryHvThermalEvent:
+          $ref: "#/components/schemas/TimestampedValue"
+        rangeThreshold:
+          $ref: "#/components/schemas/TimestampedValue"
+        distanceToEmpty:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaAvailableVersion:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaAvailableVersionGitHash:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaAvailableVersionNumber:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaAvailableVersionWeek:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaAvailableVersionYear:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaCurrentVersion:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaCurrentVersionGitHash:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaCurrentVersionNumber:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaCurrentVersionWeek:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaCurrentVersionYear:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaDownloadProgress:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaInstallDuration:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaInstallProgress:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaInstallReady:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaInstallTime:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaInstallType:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        otaCurrentStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        cabinClimateInteriorTemperature:
+          $ref: "#/components/schemas/TimestampedValue"
+        cabinPreconditioningStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        cabinPreconditioningType:
+          $ref: "#/components/schemas/TimestampedValue"
+        petModeStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        petModeTemperatureStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        cabinClimateDriverTemperature:
+          $ref: "#/components/schemas/TimestampedValue"
+        gearGuardVideoStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        gearGuardVideoMode:
+          $ref: "#/components/schemas/TimestampedValue"
+        gearGuardVideoTermsAccepted:
+          $ref: "#/components/schemas/TimestampedValue"
+        defrostDefogStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        steeringWheelHeat:
+          $ref: "#/components/schemas/TimestampedValue"
+        seatFrontLeftHeat:
+          $ref: "#/components/schemas/TimestampedValue"
+        seatFrontRightHeat:
+          $ref: "#/components/schemas/TimestampedValue"
+        seatRearLeftHeat:
+          $ref: "#/components/schemas/TimestampedValue"
+        seatRearRightHeat:
+          $ref: "#/components/schemas/TimestampedValue"
+        chargerStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        seatFrontLeftVent:
+          $ref: "#/components/schemas/TimestampedValue"
+        seatFrontRightVent:
+          $ref: "#/components/schemas/TimestampedValue"
+        chargerDerateStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        driveMode:
+          $ref: "#/components/schemas/TimestampedValue"
+        serviceMode:
+          $ref: "#/components/schemas/TimestampedValue"
+        trailerStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        carWashMode:
+          $ref: "#/components/schemas/TimestampedValue"
+        chargePortState:
+          $ref: "#/components/schemas/TimestampedValue"
+        windowsNextAction:
+          $ref: "#/components/schemas/TimestampedValue"
+        btmFfHardwareFailureStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        btmIcHardwareFailureStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        btmLfdHardwareFailureStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        btmRfHardwareFailureStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        btmRfdHardwareFailureStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        chargingTimeEstimationValidity:
+          $ref: "#/components/schemas/TimestampedValue"
+        limitedAccelCold:
+          $ref: "#/components/schemas/TimestampedValue"
+        limitedRegenCold:
+          $ref: "#/components/schemas/TimestampedValue"
+        rearHitchStatus:
+          $ref: "#/components/schemas/TimestampedValue"
+        tirePressureFrontLeft:
+          $ref: "#/components/schemas/TimestampedValue"
+        tirePressureFrontRight:
+          $ref: "#/components/schemas/TimestampedValue"
+        tirePressureRearLeft:
+          $ref: "#/components/schemas/TimestampedValue"
+        tirePressureRearRight:
+          $ref: "#/components/schemas/TimestampedValue"
+        batteryCapacity:
+          $ref: "#/components/schemas/TimestampedValue"
+        supportedFeatures:
+          type: array
+          items:
+            $ref: "#/components/schemas/SupportedFeature"
+
+    TimestampedValue:
+      type: [object, "null"]
+      properties:
+        timeStamp:
+          type: string
+          format: date-time
+        value:
+          oneOf:
+            - type: string
+            - type: number
+            - type: boolean
+            - type: integer
+
+    SupportedFeature:
+      type: object
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [AVAILABLE, UNAVAILABLE]
+
+    TrailerProfile:
+      type: [object, "null"]
+      properties:
+        __typename:
+          type: string
+          example: TrailerProfile
+        rangeStatus:
+          type: string
+        weight:
+          type: number
+        onRoadEfficiency:
+          type: number
+        offRoadEfficiency:
+          type: number
+        name:
+          type: string
+
+    TransactionStep:
+      type: object
+      properties:
+        sourceStatus:
+          type: object
+          properties:
+            status:
+              type: string
+            details:
+              type: [object, "null"]
+        consumerStatus:
+          type: object
+          properties:
+            displayOrder:
+              type: integer
+            current:
+              type: boolean
+            complete:
+              type: boolean
+            locked:
+              type: boolean
+            inProgress:
+              type: boolean
+            notStarted:
+              type: boolean
+            error:
+              type: boolean
+
+    VehicleCommand:
+      type: string
+      enum:
+        - WAKE_VEHICLE
+        - OPEN_FRUNK
+        - CLOSE_FRUNK
+        - OPEN_ALL_WINDOWS
+        - CLOSE_ALL_WINDOWS
+        - UNLOCK_ALL_CLOSURES
+        - LOCK_ALL_CLOSURES
+        - ENABLE_GEAR_GUARD_VIDEO
+        - DISABLE_GEAR_GUARD_VIDEO
+        - HONK_AND_FLASH_LIGHTS
+        - OPEN_TONNEAU_COVER
+        - CLOSE_TONNEAU_COVER
+
+    WallboxRecord:
+      type: object
+      properties:
+        __typename:
+          type: string
+          example: WallboxRecord
+        wallboxId:
+          type: string
+        userId:
+          type: string
+        wifiId:
+          type: string
+        name:
+          type: string
+        linked:
+          type: boolean
+        latitude:
+          type: number
+        longitude:
+          type: number
+        chargingStatus:
+          type: string
+          enum: [AVAILABLE, CHARGING, DISCONNECTED]
+        power:
+          type: [number, "null"]
+        currentVoltage:
+          type: [number, "null"]
+        currentAmps:
+          type: [number, "null"]
+        softwareVersion:
+          type: string
+        model:
+          type: string
+        serialNumber:
+          type: string
+        maxPower:
+          type: string
+        maxVoltage:
+          type: string
+        maxAmps:
+          type: [string, "null"]
+
+    ChargingSessionSummary:
+      type: object
+      properties:
+        chargerType:
+          type: string
+        currencyCode:
+          type: [string, "null"]
+        paidTotal:
+          type: [number, "null"]
+        startInstant:
+          type: string
+          format: date-time
+        endInstant:
+          type: string
+          format: date-time
+        totalEnergyKwh:
+          type: number
+        rangeAddedKm:
+          type: [number, "null"]
+        city:
+          type: string
+        transactionId:
+          type: string
+        vehicleId:
+          type: [string, "null"]
+        vehicleName:
+          type: [string, "null"]
+        vendor:
+          type: string
+        isRoamingNetwork:
+          type: boolean
+        isPublic:
+          type: boolean
+        isHomeCharger:
+          type: boolean
+        meta:
+          type: object
+          properties:
+            transactionIdGroupingKey:
+              type: string
+            dataSources:
+              type: array
+              items:
+                type: string
+
+    LiveSessionData:
+      type: object
+      properties:
+        isRivianCharger:
+          type: boolean
+        isFreeSession:
+          type: boolean
+        vehicleChargerState:
+          $ref: "#/components/schemas/TimestampedValue"
+        chargerId:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        timeElapsed:
+          type: string
+        timeRemaining:
+          $ref: "#/components/schemas/TimestampedValue"
+        kilometersChargedPerHour:
+          $ref: "#/components/schemas/TimestampedValue"
+        power:
+          $ref: "#/components/schemas/TimestampedValue"
+        rangeAddedThisSession:
+          $ref: "#/components/schemas/TimestampedValue"
+        totalChargedEnergy:
+          $ref: "#/components/schemas/TimestampedValue"
+        currentPrice:
+          type: number
+
+    ChargingSchedule:
+      type: object
+      properties:
+        startTime:
+          type: integer
+          description: Minutes after midnight to start charging
+        duration:
+          type: integer
+          description: Duration in minutes
+        location:
+          type: object
+          properties:
+            latitude:
+              type: number
+            longitude:
+              type: number
+        amperage:
+          type: integer
+        enabled:
+          type: boolean
+        weekDays:
+          type: array
+          items:
+            type: string
+            enum:
+              [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+
+    ChargerDetails:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        location:
+          type: object
+          properties:
+            addressComponents:
+              type: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  shortName:
+                    type: string
+                  longName:
+                    type: string
+            formattedAddress:
+              type: string
+            coordinate:
+              type: object
+              properties:
+                latitude:
+                  type: number
+                longitude:
+                  type: number
+            navCoordinate:
+              type: object
+              properties:
+                latitude:
+                  type: number
+                longitude:
+                  type: number
+        distance:
+          type: number
+        driveDetails:
+          type: [object, "null"]
+          properties:
+            driveDistance:
+              type: number
+            driveDuration:
+              type: number
+            detourDistance:
+              type: number
+            detourDuration:
+              type: number
+        chargingStation:
+          type: object
+          properties:
+            network:
+              type: string
+            networkId:
+              type: string
+            maxKw:
+              type: integer
+            note:
+              type: string
+            chargers:
+              type: array
+              items:
+                type: object
+                properties:
+                  locationId:
+                    type: string
+                  pluginDependency:
+                    type: string
+                  connectors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        evseId:
+                          type: string
+                        evseUid:
+                          type: string
+                        name:
+                          type: string
+                        level:
+                          type: string
+                        maxKw:
+                          type: integer
+                        chargingPrice:
+                          type: [object, "null"]
+                          properties:
+                            level:
+                              type: [string, "null"]
+                            description:
+                              type: [string, "null"]
+                            amount:
+                              type: [number, "null"]
+                            currency:
+                              type: [string, "null"]
+                            lastUpdateTime:
+                              type: [string, "null"]
+                            symbol:
+                              type: [string, "null"]
+                            type:
+                              type: [string, "null"]
+                            unit:
+                              type: [string, "null"]
+                        type:
+                          type: string
+                          enum: [CCS, J1772]
+                        free:
+                          type: boolean
+                        vend:
+                          type: [string, "null"]
+                        state:
+                          type: string
+            operatingHours:
+              type: object
+              properties:
+                alwaysOpen:
+                  type: boolean
+                hours:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      close:
+                        type: integer
+                      day:
+                        type: string
+                      open:
+                        type: integer
+        adapterRequired:
+          type: boolean
+
+    Delivery:
+      type: object
+      properties:
+        __typename:
+          type: string
+        status:
+          type: string
+        carrier:
+          type: string
+        deliveryAddress:
+          type: object
+          properties:
+            addressLine1:
+              type: string
+            addressLine2:
+              type: [string, "null"]
+            city:
+              type: string
+            state:
+              type: string
+            country:
+              type: string
+            zipcode:
+              type: string
+        appointmentDetails:
+          type: object
+          properties:
+            appointmentId:
+              type: string
+            startDateTime:
+              type: string
+              format: date-time
+            endDateTime:
+              type: string
+              format: date-time
+            timeZone:
+              type: string
+        vehicleVIN:
+          type: string
+
+    OrderSnapshot:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [PRE_ORDER, VEHICLE, RETAIL]
+        orderDate:
+          type: string
+        state:
+          type: string
+        configurationStatus:
+          type: [string, "null"]
+        fulfillmentSummaryStatus:
+          type: [string, "null"]
+        total:
+          type: number
+        paidTotal:
+          type: number
+        subtotal:
+          type: number
+        currency:
+          type: string
+        consumerStatuses:
+          type: [object, "null"]
+          properties:
+            isConsumerFlowComplete:
+              type: boolean
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              title:
+                type: string
+              type:
+                type: string
+              sku:
+                type: string
+
+    TripPlanResult:
+      type: object
+      properties:
+        routes:
+          type: array
+          items:
+            type: object
+            properties:
+              routeResponse:
+                type: object
+              destinationReached:
+                type: boolean
+              totalChargingDuration:
+                type: integer
+              arrivalSOC:
+                type: integer
+              arrivalReachableDistance:
+                type: integer
+              energyConsumptionOnLeg:
+                type: [number, "null"]
+              batteryEmptyToDestinationDistance:
+                type: [number, "null"]
+              batteryEmptyLocationLatitude:
+                type: [number, "null"]
+              batteryEmptyLocationLongitude:
+                type: [number, "null"]
+              waypoints:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    waypointType:
+                      type: string
+                      enum: [DC_CHARGE_STATION, OTHER]
+                    entityId:
+                      type: string
+                    name:
+                      type: [string, "null"]
+                    latitude:
+                      type: number
+                    longitude:
+                      type: number
+                    maxPower:
+                      type: [integer, "null"]
+                    chargeDuration:
+                      type: integer
+                    arrivalSOC:
+                      type: integer
+                    arrivalReachableDistance:
+                      type: integer
+                    departureSOC:
+                      type: integer
+                    departureReachableDistance:
+                      type: integer
+                    adapterRequired:
+                      type: [boolean, "null"]
+        tripPlanStatus:
+          type: string
+        chargeStationsAvailable:
+          type: boolean
+        socBelowLimit:
+          type: boolean
+
+    PlaceResult:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        distance:
+          type: number
+        location:
+          type: object
+          properties:
+            addressComponents:
+              type: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  shortName:
+                    type: string
+                  longName:
+                    type: string
+            coordinate:
+              type: object
+              properties:
+                latitude:
+                  type: number
+                longitude:
+                  type: number
+            navCoordinate:
+              type: object
+              properties:
+                latitude:
+                  type: number
+                longitude:
+                  type: number
+            formattedAddress:
+              type: string
+        driveDetails:
+          type: object
+          properties:
+            driveDistance:
+              type: number
+            driveDuration:
+              type: number
+            detourDistance:
+              type: number
+            detourDuration:
+              type: number
+
+    VehicleMobileImage:
+      type: object
+      properties:
+        __typename:
+          type: string
+        vehicleId:
+          type: string
+        orderId:
+          type: string
+        url:
+          type: string
+          format: uri
+        resolution:
+          type: string
+        size:
+          type: string
+          enum: [small, large]
+        design:
+          type: string
+          enum: [dark, light]
+        placement:
+          type: string
+          enum: [front, rear, side, side-charging, overhead]
+        overlays:
+          type: [array, "null"]
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+              overlay:
+                type: string
+              zIndex:
+                type: integer
+
+paths:
+  # ── Authentication ──────────────────────────────────────────
+  /gateway/graphql#CreateCSRFToken:
+    post:
+      tags: [Authentication]
+      operationId: createCSRFToken
+      summary: Create a CSRF token
+      description: Generates a CSRF token and app session token required for all subsequent requests.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: CreateCSRFToken
+                variables:
+                  type: array
+                  example: []
+                query:
+                  type: string
+                  example: "mutation CreateCSRFToken { createCsrfToken { __typename csrfToken appSessionToken } }"
+      responses:
+        "200":
+          description: CSRF token created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateCSRFTokenResponse"
+
+  /gateway/graphql#Login:
+    post:
+      tags: [Authentication]
+      operationId: login
+      summary: Login with email and password
+      description: |
+        Authenticates with email and password. Returns either an access token (non-MFA)
+        or an OTP token (MFA required). Requires `apollographql-client-name` header.
+      parameters:
+        - name: a-sess
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: csrf-token
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: apollographql-client-name
+          in: header
+          required: true
+          schema:
+            type: string
+            example: com.rivian.android.consumer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: Login
+                variables:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                    password:
+                      type: string
+                query:
+                  type: string
+                  example: "mutation Login($email: String!, $password: String!) { login(email: $email, password: $password) { __typename ... on MobileLoginResponse { accessToken refreshToken userSessionToken } ... on MobileMFALoginResponse { otpToken } } }"
+      responses:
+        "200":
+          description: Login successful or MFA required
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/LoginResponse"
+                  - $ref: "#/components/schemas/MFALoginResponse"
+
+  /gateway/graphql#LoginWithOTP:
+    post:
+      tags: [Authentication]
+      operationId: loginWithOTP
+      summary: Login with OTP (MFA)
+      description: Completes MFA login using the OTP code and token from the initial login response.
+      parameters:
+        - name: a-sess
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: csrf-token
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: apollographql-client-name
+          in: header
+          required: true
+          schema:
+            type: string
+            example: com.rivian.android.consumer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: LoginWithOTP
+                variables:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                    otpCode:
+                      type: string
+                    otpToken:
+                      type: string
+                query:
+                  type: string
+                  example: "mutation LoginWithOTP($email: String!, $otpCode: String!, $otpToken: String!) { loginWithOTP(email: $email, otpCode: $otpCode, otpToken: $otpToken) { __typename accessToken refreshToken userSessionToken } }"
+      responses:
+        "200":
+          description: MFA login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+
+  # ── Account Endpoints ───────────────────────────────────────
+  /gateway/graphql#getUserInfo:
+    post:
+      tags: [Account]
+      operationId: getUserInfo
+      summary: Get user account information
+      description: Returns user info including vehicles, enrolled phones, and pending invites.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: getUserInfo
+                variables:
+                  type: object
+                query:
+                  type: string
+      responses:
+        "200":
+          description: User info retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      currentUser:
+                        $ref: "#/components/schemas/UserInfo"
+
+  /gateway/graphql#CurrentUserForLogin:
+    post:
+      tags: [Account]
+      operationId: currentUserForLogin
+      summary: Get current user configuration
+      description: Returns detailed vehicle configuration, maintenance schedule, and user settings.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraphQLRequest"
+      responses:
+        "200":
+          description: Current user details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      currentUser:
+                        $ref: "#/components/schemas/UserInfo"
+
+  /gateway/graphql#vehicleOrders:
+    post:
+      tags: [Account]
+      operationId: vehicleOrders
+      summary: List vehicle orders
+      description: Returns a list of vehicle orders (pre-orders and vehicle orders) for your account.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraphQLRequest"
+      responses:
+        "200":
+          description: Vehicle orders list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      orders:
+                        type: object
+                        properties:
+                          data:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/OrderSnapshot"
+
+  /gateway/graphql#delivery:
+    post:
+      tags: [Account]
+      operationId: delivery
+      summary: Get delivery information
+      description: Returns delivery status and appointment details for a vehicle order.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: delivery
+                variables:
+                  type: object
+                  required: [orderId]
+                  properties:
+                    orderId:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Delivery info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      delivery:
+                        $ref: "#/components/schemas/Delivery"
+
+  /orders/graphql#order:
+    post:
+      tags: [Account]
+      operationId: order
+      summary: Get order details
+      description: Returns full details for a given order including payments, configuration, fees, and taxes.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: order
+                variables:
+                  type: object
+                  required: [orderId]
+                  properties:
+                    orderId:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Order details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      order:
+                        type: object
+                        properties:
+                          vin:
+                            type: [string, "null"]
+                          state:
+                            type: string
+                          billingAddress:
+                            type: object
+                            properties:
+                              firstName:
+                                type: string
+                              lastName:
+                                type: string
+                              line1:
+                                type: string
+                              line2:
+                                type: [string, "null"]
+                              city:
+                                type: string
+                              state:
+                                type: string
+                              country:
+                                type: string
+                              postalCode:
+                                type: string
+                          shippingAddress:
+                            type: object
+                            properties:
+                              firstName:
+                                type: string
+                              lastName:
+                                type: string
+                              line1:
+                                type: string
+                              line2:
+                                type: [string, "null"]
+                              city:
+                                type: string
+                              state:
+                                type: string
+                              country:
+                                type: string
+                              postalCode:
+                                type: string
+                          orderCancelDate:
+                            type: [string, "null"]
+                          orderEmail:
+                            type: string
+                          currency:
+                            type: string
+                          locale:
+                            type: string
+                          storeId:
+                            type: string
+                          type:
+                            type: string
+                          subtotal:
+                            type: number
+                          discountTotal:
+                            type: number
+                          taxTotal:
+                            type: number
+                          feesTotal:
+                            type: number
+                          paidTotal:
+                            type: number
+                          remainingTotal:
+                            type: number
+                          outstandingBalance:
+                            type: number
+                          costAfterCredits:
+                            type: number
+                          total:
+                            type: number
+                          payments:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                intent:
+                                  type: string
+                                date:
+                                  type: string
+                                method:
+                                  type: string
+                                amount:
+                                  type: number
+                                referenceNumber:
+                                  type: [string, "null"]
+                                status:
+                                  type: string
+                                card:
+                                  type: [object, "null"]
+                                  properties:
+                                    last4:
+                                      type: string
+                                    expiryDate:
+                                      type: string
+                                    brand:
+                                      type: string
+                                bank:
+                                  type: [object, "null"]
+                                  properties:
+                                    bankName:
+                                      type: string
+                                    country:
+                                      type: string
+                                    last4:
+                                      type: string
+                                transactionNotes:
+                                  type: [string, "null"]
+                          tradeIns:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                tradeInReferenceId:
+                                  type: string
+                                amount:
+                                  type: number
+                          vehicle:
+                            type: [object, "null"]
+                            properties:
+                              vehicleId:
+                                type: string
+                              vin:
+                                type: [string, "null"]
+                              modelYear:
+                                type: integer
+                              model:
+                                type: string
+                              make:
+                                type: string
+                          items:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                subtotal:
+                                  type: number
+                                quantity:
+                                  type: integer
+                                title:
+                                  type: string
+                                productId:
+                                  type: string
+                                type:
+                                  type: string
+                                unitPrice:
+                                  type: number
+                                sku:
+                                  type: string
+
+  /orders/graphql#searchOrders:
+    post:
+      tags: [Account]
+      operationId: searchOrders
+      summary: Search retail orders
+      description: Returns a list of retail orders with pagination and sorting.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: searchOrders
+                variables:
+                  type: object
+                  properties:
+                    orderTypes:
+                      type: array
+                      items:
+                        type: string
+                      example: [RETAIL]
+                    orderStates:
+                      type: [array, "null"]
+                      items:
+                        type: string
+                    dateRange:
+                      type: [object, "null"]
+                    pageInfo:
+                      type: object
+                      properties:
+                        from:
+                          type: integer
+                        size:
+                          type: integer
+                    sortFields:
+                      type: object
+                      properties:
+                        orderDate:
+                          type: string
+                          enum: [ASC, DESC]
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      searchOrders:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                          data:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/OrderSnapshot"
+
+  /orders/graphql#user:
+    post:
+      tags: [Account]
+      operationId: user
+      summary: Get user info for orders
+      description: Returns user account information relevant to orders, including addresses and order snapshots.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraphQLRequest"
+      responses:
+        "200":
+          description: User info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        type: object
+                        properties:
+                          email:
+                            type: object
+                            properties:
+                              email:
+                                type: string
+                          phone:
+                            type: object
+                            properties:
+                              formatted:
+                                type: string
+                          firstName:
+                            type: string
+                          lastName:
+                            type: string
+                          addresses:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                type:
+                                  type: array
+                                  items:
+                                    type: string
+                                line1:
+                                  type: string
+                                line2:
+                                  type: [string, "null"]
+                                city:
+                                  type: string
+                                state:
+                                  type: string
+                                country:
+                                  type: string
+                                postalCode:
+                                  type: string
+                          newsletterSubscription:
+                            type: boolean
+                          smsSubscription:
+                            type: boolean
+                          registrationChannels2FA:
+                            type: object
+                          userId:
+                            type: string
+                          vehicles:
+                            type: array
+                            items:
+                              type: object
+                          invites:
+                            type: array
+                            items:
+                              type: object
+                          orderSnapshots:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/OrderSnapshot"
+
+  /orders/graphql#paymentMethods:
+    post:
+      tags: [Account]
+      operationId: paymentMethods
+      summary: Get payment methods
+      description: Returns saved payment methods for the user.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraphQLRequest"
+      responses:
+        "200":
+          description: Payment methods
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      paymentMethods:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            type:
+                              type: string
+                            default:
+                              type: boolean
+                            card:
+                              type: object
+                              properties:
+                                lastFour:
+                                  type: string
+                                brand:
+                                  type: string
+                                expiration:
+                                  type: string
+                                postalCode:
+                                  type: string
+
+  /t2d/graphql#transactionStatus:
+    post:
+      tags: [Account]
+      operationId: transactionStatus
+      summary: Get transaction status
+      description: Returns the status of each step in the vehicle purchase transaction flow.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: transactionStatus
+                variables:
+                  type: object
+                  required: [orderId]
+                  properties:
+                    orderId:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Transaction statuses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      transactionStatus:
+                        type: object
+                        properties:
+                          titleAndReg:
+                            $ref: "#/components/schemas/TransactionStep"
+                          tradeIn:
+                            $ref: "#/components/schemas/TransactionStep"
+                          finance:
+                            $ref: "#/components/schemas/TransactionStep"
+                          delivery:
+                            $ref: "#/components/schemas/TransactionStep"
+                          insurance:
+                            $ref: "#/components/schemas/TransactionStep"
+                          documentUpload:
+                            $ref: "#/components/schemas/TransactionStep"
+                          contracts:
+                            $ref: "#/components/schemas/TransactionStep"
+                          payment:
+                            $ref: "#/components/schemas/TransactionStep"
+
+  /t2d/graphql#financeSummary:
+    post:
+      tags: [Account]
+      operationId: financeSummary
+      summary: Get finance summary
+      description: Returns financing details for an order.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: financeSummary
+                variables:
+                  type: object
+                  required: [orderId]
+                  properties:
+                    orderId:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Finance summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      financeSummary:
+                        type: object
+                        properties:
+                          orderId:
+                            type: string
+                          status:
+                            type: string
+                          financeChoice:
+                            type: object
+                            properties:
+                              financeChoice:
+                                type: string
+                              institutionName:
+                                type: [string, "null"]
+                              paymentMethod:
+                                type: string
+                              trackingNumber:
+                                type: [string, "null"]
+                              preApprovedAmount:
+                                type: string
+                              loanOfficerName:
+                                type: [string, "null"]
+                              loanOfficerContact:
+                                type: [string, "null"]
+                              downPayment:
+                                type: string
+                              rate:
+                                type: number
+                              term:
+                                type: integer
+                              rateAndTermSkipped:
+                                type: boolean
+
+  /gateway/graphql#GetProvisionedCampSpeakers:
+    post:
+      tags: [Account]
+      operationId: getProvisionedCampSpeakers
+      summary: List camp speakers
+      description: Returns camp speakers provisioned to your account.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraphQLRequest"
+      responses:
+        "200":
+          description: Camp speakers list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      currentUser:
+                        type: object
+                        properties:
+                          vehicles:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                connectedProducts:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      __typename:
+                                        type: string
+                                        example: CampSpeaker
+                                      serialNumber:
+                                        type: string
+                                      id:
+                                        type: string
+
+  /chrg/user/graphql#getRegisteredWallboxes:
+    post:
+      tags: [Account]
+      operationId: getRegisteredWallboxes
+      summary: List registered wallboxes
+      description: Returns L2 chargers (wallboxes) provisioned to your account.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraphQLRequest"
+      responses:
+        "200":
+          description: Wallbox list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getRegisteredWallboxes:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/WallboxRecord"
+
+  # ── Charging Endpoints ──────────────────────────────────────
+  /chrg/user/graphql#getWallboxStatus:
+    post:
+      tags: [Charging]
+      operationId: getWallboxStatus
+      summary: Get wallbox status
+      description: Returns the current status of a wallbox.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: getWallboxStatus
+                variables:
+                  type: object
+                  required: [wallboxId]
+                  properties:
+                    wallboxId:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Wallbox status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getWallboxStatus:
+                        $ref: "#/components/schemas/WallboxRecord"
+
+  /chrg/user/graphql#updateWallbox:
+    post:
+      tags: [Charging]
+      operationId: updateWallbox
+      summary: Update wallbox name
+      description: Renames a wallbox.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: updateWallbox
+                variables:
+                  type: object
+                  required: [wallboxId]
+                  properties:
+                    wallboxId:
+                      type: string
+                    name:
+                      type: string
+                    wifiId:
+                      type: string
+                    latitude:
+                      type: string
+                    longitude:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Updated wallbox
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      updateWallbox:
+                        $ref: "#/components/schemas/WallboxRecord"
+
+  /chrg/user/graphql#getCompletedSessionSummaries:
+    post:
+      tags: [Charging]
+      operationId: getCompletedSessionSummaries
+      summary: Get completed charging session summaries
+      description: Returns a summary of past charging sessions.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraphQLRequest"
+      responses:
+        "200":
+          description: Session summaries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getCompletedSessionSummaries:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ChargingSessionSummary"
+
+  /chrg/user/graphql#getLiveSessionData:
+    post:
+      tags: [Charging]
+      operationId: getLiveSessionData
+      summary: Get live charging session data
+      description: Returns real-time data for an active charging session.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: getLiveSessionData
+                variables:
+                  type: object
+                  required: [vehicleId]
+                  properties:
+                    vehicleId:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Live session data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getLiveSessionData:
+                        $ref: "#/components/schemas/LiveSessionData"
+
+  /chrg/user/graphql#getLiveSessionHistory:
+    post:
+      tags: [Charging]
+      operationId: getLiveSessionHistory
+      summary: Get live charging session history
+      description: Returns historical power data (kW over time) for an active charging session.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: getLiveSessionHistory
+                variables:
+                  type: object
+                  required: [vehicleId]
+                  properties:
+                    vehicleId:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Session history chart data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getLiveSessionHistory:
+                        type: object
+                        properties:
+                          chartData:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                kw:
+                                  type: number
+                                time:
+                                  type: string
+                                  format: date-time
+
+  /chrg/user/graphql#getNonRivianUserSession:
+    post:
+      tags: [Charging]
+      operationId: getNonRivianUserSession
+      summary: Get non-Rivian charging session
+      description: Returns info about active third-party charging sessions.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraphQLRequest"
+      responses:
+        "200":
+          description: Non-Rivian session data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getNonRivianUserSession:
+                        type: [object, "null"]
+                        properties:
+                          chargerId:
+                            type: [string, "null"]
+                          transactionId:
+                            type: [string, "null"]
+                          isRivianCharger:
+                            type: boolean
+                          vehicleChargerState:
+                            type: [object, "null"]
+                            properties:
+                              value:
+                                type: string
+                              updatedAt:
+                                type: string
+                                format: date-time
+
+  /chrg/user/graphql#CheckByRivianId:
+    post:
+      tags: [Charging]
+      operationId: checkByRivianId
+      summary: Check linked third-party accounts
+      description: Shows whether third-party charging accounts (e.g. ChargePoint) are linked.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraphQLRequest"
+      responses:
+        "200":
+          description: Linked account status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      chargepoint:
+                        type: object
+                        properties:
+                          checkByRivianId:
+                            type: boolean
+
+  /chrg/user/graphql#getLinkedEmailForRivianId:
+    post:
+      tags: [Charging]
+      operationId: getLinkedEmailForRivianId
+      summary: Get linked third-party email
+      description: Returns email addresses for third-party charging accounts linked to your Rivian account.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraphQLRequest"
+      responses:
+        "200":
+          description: Linked email
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      chargepoint:
+                        type: object
+                        properties:
+                          getLinkedEmailForRivianId:
+                            type: object
+                            properties:
+                              email:
+                                type: string
+
+  /gateway/graphql#ChargerDetails:
+    post:
+      tags: [Charging]
+      operationId: chargerDetails
+      summary: Get charger details
+      description: Returns details for one or more DC charging stations by their IDs.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: ChargerDetails
+                variables:
+                  type: object
+                  required: [ids]
+                  properties:
+                    ids:
+                      type: array
+                      items:
+                        type: string
+                    userLocation:
+                      type: object
+                      properties:
+                        latitude:
+                          type: number
+                        longitude:
+                          type: number
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Charger details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      chargerByIds:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ChargerDetails"
+
+  /gateway/graphql#SetChargingSchedule:
+    post:
+      tags: [Charging]
+      operationId: setChargingSchedule
+      summary: Set charging schedule
+      description: Sets a scheduled charging window with location and amperage.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: SetChargingSchedule
+                variables:
+                  type: object
+                  required: [vehicleId, chargingSchedules]
+                  properties:
+                    vehicleId:
+                      type: string
+                    chargingSchedules:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/ChargingSchedule"
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Schedule set
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      setChargingSchedules:
+                        type: object
+                        properties:
+                          success:
+                            type: boolean
+
+  /gateway/graphql#GetChargingSchedule:
+    post:
+      tags: [Charging]
+      operationId: getChargingSchedule
+      summary: Get charging schedule
+      description: Returns the current charging schedule for a vehicle.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: GetChargingSchedule
+                variables:
+                  type: object
+                  required: [vehicleId]
+                  properties:
+                    vehicleId:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Charging schedules
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getVehicle:
+                        type: object
+                        properties:
+                          chargingSchedules:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/ChargingSchedule"
+
+  # ── Vehicle Controls ────────────────────────────────────────
+  /gateway/graphql#EnrollPhone:
+    post:
+      tags: [Vehicle Controls]
+      operationId: enrollPhone
+      summary: Enroll a phone key
+      description: |
+        Registers a phone as a key for the vehicle. Requires generating an ECDH key pair
+        using the secp256r1 curve and sending the public key. Up to 2 phones can be enrolled.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: EnrollPhone
+                variables:
+                  type: object
+                  required: [attrs]
+                  properties:
+                    attrs:
+                      type: object
+                      required: [userId, vehicleId, publicKey, type, name]
+                      properties:
+                        userId:
+                          type: string
+                        vehicleId:
+                          type: string
+                        publicKey:
+                          type: string
+                          description: PEM-encoded ECDH public key (secp256r1)
+                        type:
+                          type: string
+                          description: Phone model
+                        name:
+                          type: string
+                          description: Phone name
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Phone enrolled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      enrollPhone:
+                        type: object
+                        properties:
+                          __typename:
+                            type: string
+                          success:
+                            type: boolean
+
+  /gateway/graphql#DisenrollPhone:
+    post:
+      tags: [Vehicle Controls]
+      operationId: disenrollPhone
+      summary: Disenroll a phone key
+      description: Removes a phone key from the vehicle.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: DisenrollPhone
+                variables:
+                  type: object
+                  required: [attrs]
+                  properties:
+                    attrs:
+                      type: object
+                      required: [enrollmentId]
+                      properties:
+                        enrollmentId:
+                          type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Phone disenrolled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      disenrollPhone:
+                        type: object
+                        properties:
+                          __typename:
+                            type: string
+                            example: DisenrollPhoneResponse
+                          success:
+                            type: boolean
+
+  /gateway/graphql#sendVehicleCommand:
+    post:
+      tags: [Vehicle Controls]
+      operationId: sendVehicleCommand
+      summary: Send a vehicle command
+      description: |
+        Sends a command to the vehicle. Requires an HMAC signature computed from the
+        command name and timestamp using your phone key's private key.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: sendVehicleCommand
+                variables:
+                  type: object
+                  required: [attrs]
+                  properties:
+                    attrs:
+                      type: object
+                      required:
+                        [
+                          command,
+                          hmac,
+                          timestamp,
+                          vasPhoneId,
+                          deviceId,
+                          vehicleId,
+                        ]
+                      properties:
+                        command:
+                          $ref: "#/components/schemas/VehicleCommand"
+                        hmac:
+                          type: string
+                          description: HMAC-SHA256 of "{command}{timestamp}" using phone private key
+                        timestamp:
+                          type: integer
+                          description: Unix timestamp
+                        vasPhoneId:
+                          type: string
+                        deviceId:
+                          type: string
+                        vehicleId:
+                          type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Command sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      sendVehicleCommand:
+                        type: object
+                        properties:
+                          __typename:
+                            type: string
+                          id:
+                            type: string
+                          command:
+                            type: string
+                          state:
+                            type: integer
+
+  /gateway/graphql#getVehicleCommand:
+    post:
+      tags: [Vehicle Controls]
+      operationId: getVehicleCommand
+      summary: Get vehicle command status
+      description: Returns the status of a previously sent vehicle command.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: getVehicleCommand
+                variables:
+                  type: object
+                  required: [id]
+                  properties:
+                    id:
+                      type: string
+                      description: Command ID returned from sendVehicleCommand
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Command status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getVehicleCommand:
+                        type: object
+                        properties:
+                          __typename:
+                            type: string
+                            example: GetVehicleCommandState
+                          id:
+                            type: string
+                          command:
+                            type: string
+                          createdAt:
+                            type: string
+                          state:
+                            type: integer
+                            description: "0 = completed"
+                          responseCode:
+                            type: [string, "null"]
+                          statusCode:
+                            type: [string, "null"]
+
+  /gateway/graphql#ParseAndShareLocationToVehicle:
+    post:
+      tags: [Vehicle Controls]
+      operationId: parseAndShareLocationToVehicle
+      summary: Share a location to the vehicle
+      description: Sends a location URL to the vehicle's navigation system.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: ParseAndShareLocationToVehicle
+                variables:
+                  type: object
+                  required: [str, vehicleId]
+                  properties:
+                    str:
+                      type: string
+                      description: URL of the location to share
+                    vehicleId:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Location shared
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      parseAndShareLocationToVehicle:
+                        type: object
+                        properties:
+                          __typename:
+                            type: string
+                            example: ParseAndShareLocationToVehicleResponse
+                          publishResponse:
+                            type: object
+                            properties:
+                              __typename:
+                                type: string
+                                example: PublishResponse
+                              result:
+                                type: integer
+
+  # ── Vehicle Info ────────────────────────────────────────────
+  /gateway/graphql#GetVehicleState:
+    post:
+      tags: [Vehicle Info]
+      operationId: getVehicleState
+      summary: Get vehicle state
+      description: Returns comprehensive vehicle state including location, closures, battery, charging, climate, OTA, and more.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: GetVehicleState
+                variables:
+                  type: object
+                  required: [vehicleID]
+                  properties:
+                    vehicleID:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Vehicle state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      vehicleState:
+                        $ref: "#/components/schemas/VehicleState"
+
+  /gateway/graphql#GetVehicleLastConnection:
+    post:
+      tags: [Vehicle Info]
+      operationId: getVehicleLastConnection
+      summary: Get last cloud connection
+      description: Returns when the vehicle last synced with Rivian Cloud.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: GetVehicleLastConnection
+                variables:
+                  type: object
+                  required: [vehicleID]
+                  properties:
+                    vehicleID:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Last connection info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      vehicleState:
+                        type: object
+                        properties:
+                          cloudConnection:
+                            type: object
+                            properties:
+                              lastSync:
+                                type: string
+                                format: date-time
+
+  /gateway/graphql#GetVehicle:
+    post:
+      tags: [Vehicle Info]
+      operationId: getVehicle
+      summary: Get vehicle details
+      description: Returns vehicle details including invited users, keys, and device info.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: GetVehicle
+                variables:
+                  type: object
+                  required: [getVehicleId]
+                  properties:
+                    getVehicleId:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Vehicle details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getVehicle:
+                        type: object
+                        properties:
+                          __typename:
+                            type: string
+                            example: Vehicle
+                          invitedUsers:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                __typename:
+                                  type: string
+                                  enum: [ProvisionedUser, UnprovisionedUser]
+                                devices:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      type:
+                                        type: string
+                                      mappedIdentityId:
+                                        type: string
+                                      id:
+                                        type: string
+                                      hrid:
+                                        type: string
+                                      deviceName:
+                                        type: string
+                                      isPaired:
+                                        type: boolean
+                                      isEnabled:
+                                        type: boolean
+                                firstName:
+                                  type: string
+                                lastName:
+                                  type: string
+                                email:
+                                  type: string
+                                roles:
+                                  type: array
+                                  items:
+                                    type: string
+                                userId:
+                                  type: string
+
+  /gateway/graphql#getOTAUpdateDetails:
+    post:
+      tags: [Vehicle Info]
+      operationId: getOTAUpdateDetails
+      summary: Get OTA update details
+      description: Returns release notes for current and available OTA updates.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: getOTAUpdateDetails
+                variables:
+                  type: object
+                  required: [vehicleId]
+                  properties:
+                    vehicleId:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: OTA update details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getVehicle:
+                        type: object
+                        properties:
+                          availableOTAUpdateDetails:
+                            type: [object, "null"]
+                            properties:
+                              url:
+                                type: string
+                              version:
+                                type: string
+                              locale:
+                                type: string
+                          currentOTAUpdateDetails:
+                            type: [object, "null"]
+                            properties:
+                              url:
+                                type: string
+                              version:
+                                type: string
+                              locale:
+                                type: string
+
+  /gateway/graphql#GetVehicleImages:
+    post:
+      tags: [Vehicle Info]
+      operationId: getVehicleImages
+      summary: Get vehicle images
+      description: Returns image assets for your vehicle in various placements and designs.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      parameters:
+        - name: dc-cid
+          in: header
+          required: true
+          schema:
+            type: string
+            example: m-android
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: GetVehicleImages
+                variables:
+                  type: object
+                  required: [extension, resolution, vehicleVersion]
+                  properties:
+                    extension:
+                      type: string
+                      example: png
+                    resolution:
+                      type: string
+                      example: "@3x"
+                    vehicleVersion:
+                      type: string
+                      description: "Vehicle version number (try 1-5)"
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Vehicle images
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getVehicleOrderMobileImages:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/VehicleMobileImage"
+                      getVehicleMobileImages:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/VehicleMobileImage"
+
+  /gateway/graphql#GetEstimatedRange:
+    post:
+      tags: [Vehicle Info]
+      operationId: getEstimatedRange
+      summary: Get estimated range
+      description: Returns estimated range in kilometers based on battery SOC, drive mode, and trailer profile.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      parameters:
+        - name: dc-cid
+          in: header
+          required: true
+          schema:
+            type: string
+            example: m-android
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: GetEstimatedRange
+                variables:
+                  type: object
+                  required: [startSoc, vehicleId]
+                  properties:
+                    startSoc:
+                      type: number
+                      minimum: 0
+                      maximum: 100
+                      description: Battery percentage (0-100)
+                    vehicleId:
+                      type: string
+                    driveMode:
+                      type: string
+                    trailerProfile:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Estimated range
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getVehicle:
+                        type: object
+                        properties:
+                          estimatedRange:
+                            type: number
+                            description: Range in kilometers
+
+  /gateway/graphql#SetVehicleName:
+    post:
+      tags: [Vehicle Info]
+      operationId: setVehicleName
+      summary: Set vehicle name
+      description: Renames your vehicle.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: SetVehicleName
+                variables:
+                  type: object
+                  required: [vehicleId, name]
+                  properties:
+                    vehicleId:
+                      type: string
+                    name:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Name updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      setVehicleName:
+                        type: object
+                        properties:
+                          value:
+                            type: string
+
+  /gateway/graphql#SupportedFeatures:
+    post:
+      tags: [Vehicle Info]
+      operationId: supportedFeatures
+      summary: Get supported features
+      description: Returns feature flags enabled for all vehicles in your account.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraphQLRequest"
+      responses:
+        "200":
+          description: Supported features
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      currentUser:
+                        type: object
+                        properties:
+                          vehicles:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                vehicle:
+                                  type: object
+                                  properties:
+                                    vehicleState:
+                                      type: object
+                                      properties:
+                                        supportedFeatures:
+                                          type: array
+                                          items:
+                                            $ref: "#/components/schemas/SupportedFeature"
+
+  /gateway/graphql#RegisterPushNotificationToken:
+    post:
+      tags: [Vehicle Info]
+      operationId: registerPushNotificationToken
+      summary: Register push notification token
+      description: Registers an FCM push notification token for your account.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: RegisterPushNotificationToken
+                variables:
+                  type: object
+                  required: [data]
+                  properties:
+                    data:
+                      type: object
+                      required: [locale, token, type, userId, mobileApp]
+                      properties:
+                        locale:
+                          type: string
+                          example: en_US
+                        token:
+                          type: string
+                        type:
+                          type: string
+                          enum: [FCM]
+                        userId:
+                          type: string
+                        mobileApp:
+                          type: string
+                          example: CONSUMER_RELEASE
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Token registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      registerPushNotificationToken:
+                        type: object
+                        properties:
+                          deviceTokenId:
+                            type: string
+                          locale:
+                            type: string
+                          success:
+                            type: boolean
+                          token:
+                            type: string
+
+  /mobile/static/img/v1/features/wheels/{wheelOption}.png:
+    servers:
+      - url: https://rivian.com
+    get:
+      tags: [Vehicle Info]
+      operationId: getVehicleWheelImage
+      summary: Get vehicle wheel image
+      description: |
+        Returns a PNG image of a wheel option. The wheel option ID can be found
+        in the CurrentUserForLogin response as `wheelOption.optionId`.
+        No authentication required.
+      parameters:
+        - name: wheelOption
+          in: path
+          required: true
+          description: "Wheel option ID (e.g. WHL-0AS, WHL-0A1, WHL-2SS)"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Wheel image
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+
+  /gql-consumer-subscriptions/graphql:
+    servers:
+      - url: wss://api.rivian.com
+    get:
+      tags: [Vehicle Info]
+      operationId: vehicleSubscriptions
+      summary: WebSocket subscriptions
+      description: |
+        WebSocket endpoint for real-time vehicle data subscriptions.
+        Uses the `graphql-ws` protocol. Connect, send `connection_init` with auth payload,
+        then subscribe to one or more topics.
+
+        **Available subscriptions:**
+        - `tirePressureState` - Tire pressure data
+        - `vehicleDepartureSchedules` - Departure schedule changes
+        - `vehicleCloudConnection` - Cloud connection status
+        - `vehicleState` - Full vehicle state updates
+
+        **Connection init payload:**
+        ```json
+        {
+          "type": "connection_init",
+          "payload": {
+            "dc-cid": "<device-correlation-id>",
+            "u-sess": "<user-session-token>",
+            "client-name": "com.rivian.android.consumer",
+            "client-version": "2.6.1-2065"
+          }
+        }
+        ```
+      parameters:
+        - name: a-sess
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: u-sess
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: csrf-token
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "101":
+          description: WebSocket upgrade successful
+
+  # ── Trip Planning ───────────────────────────────────────────
+  /gateway/graphql#Places:
+    post:
+      tags: [Trip Planning]
+      operationId: places
+      summary: Search for places
+      description: Searches for places by query text, used when creating routes.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: Places
+                variables:
+                  type: object
+                  required: [params]
+                  properties:
+                    params:
+                      type: object
+                      required: [query]
+                      properties:
+                        userLocation:
+                          type: object
+                          properties:
+                            latitude:
+                              type: number
+                            longitude:
+                              type: number
+                        query:
+                          type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Place results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      places:
+                        type: object
+                        properties:
+                          dataProvider:
+                            type: string
+                          results:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/PlaceResult"
+
+  /gateway/graphql#planTripWithMultiStop:
+    post:
+      tags: [Trip Planning]
+      operationId: planTrip
+      summary: Plan a trip
+      description: Plans charging stops along a route given waypoints, vehicle state, and preferences.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: planTripWithMultiStop
+                variables:
+                  type: object
+                  required: [waypoints, originBearing, vehicleId, startingSoc]
+                  properties:
+                    waypoints:
+                      type: array
+                      items:
+                        type: object
+                        required: [latitude, longitude, waypointType]
+                        properties:
+                          latitude:
+                            type: number
+                          longitude:
+                            type: number
+                          entityId:
+                            type: string
+                          waypointType:
+                            type: string
+                            enum: [OTHER, DC_CHARGE_STATION]
+                    originBearing:
+                      type: number
+                    vehicleId:
+                      type: string
+                    startingSoc:
+                      type: number
+                    startingRangeMeters:
+                      type: number
+                    targetArrivalSocPercent:
+                      type: number
+                    driveMode:
+                      type: string
+                      enum: [EVERYDAY, SPORT, CONSERVE]
+                    networkPreferences:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          networkId:
+                            type: string
+                          preference:
+                            type: integer
+                    trailerProfile:
+                      type: string
+                      enum: [NONE]
+                    avoidAdapterRequired:
+                      type: boolean
+                    supportedConnectorTypes:
+                      type: array
+                      items:
+                        type: string
+                        enum: [CCS, J1772]
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Trip plan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      planTripMultiStop:
+                        $ref: "#/components/schemas/TripPlanResult"
+
+  /gateway/graphql#saveTrip:
+    post:
+      tags: [Trip Planning]
+      operationId: saveTrip
+      summary: Save a trip
+      description: Saves a new trip with stops, drive mode, and departure time.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: saveTrip
+                variables:
+                  type: object
+                  required: [attrs]
+                  properties:
+                    attrs:
+                      type: object
+                      required: [name, startingSOC, stops]
+                      properties:
+                        name:
+                          type: string
+                        startingSOC:
+                          type: number
+                        stops:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              location:
+                                type: object
+                                properties:
+                                  latitude:
+                                    type: number
+                                  longitude:
+                                    type: number
+                              targetArrivalSOCPercent:
+                                type: number
+                              type:
+                                type: string
+                                enum: [VEHICLE_LOCATION, POI]
+                              placeId:
+                                type: object
+                                properties:
+                                  value:
+                                    type: string
+                                  dataProvider:
+                                    type: string
+                        driveMode:
+                          type: string
+                        networkPreferences:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              networkId:
+                                type: string
+                              preference:
+                                type: integer
+                        trailerProfile:
+                          type: string
+                        avoidAdapterRequired:
+                          type: boolean
+                        departureTime:
+                          type: integer
+                          description: Unix timestamp
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Trip saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      saveTrip:
+                        type: string
+                        description: New trip ID
+
+  /gateway/graphql#getSavedTrips:
+    post:
+      tags: [Trip Planning]
+      operationId: getSavedTrips
+      summary: Get saved trips
+      description: Returns all saved trips for the user.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraphQLRequest"
+      responses:
+        "200":
+          description: Saved trips
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getSavedTrips:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            startingSOC:
+                              type: number
+                            stops:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                  location:
+                                    type: object
+                                    properties:
+                                      latitude:
+                                        type: number
+                                      longitude:
+                                        type: number
+                                  targetArrivalSOCPercent:
+                                    type: number
+                                  type:
+                                    type: string
+                                  placeId:
+                                    type: object
+                                    properties:
+                                      value:
+                                        type: string
+                                      dataProvider:
+                                        type: string
+                            driveMode:
+                              type: string
+                            networkPreferences:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  networkId:
+                                    type: string
+                                  preference:
+                                    type: string
+                            trailerProfile:
+                              type: string
+                            avoidAdapterRequired:
+                              type: boolean
+                            createdAt:
+                              type: string
+                            updatedAt:
+                              type: string
+                            departureTime:
+                              type: string
+
+  /gateway/graphql#GetTrailerProfiles:
+    post:
+      tags: [Trip Planning]
+      operationId: getTrailerProfiles
+      summary: Get trailer profiles
+      description: Returns saved trailer profiles for a vehicle.
+      security:
+        - sessionAuth: []
+          userSessionAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: GetTrailerProfiles
+                variables:
+                  type: object
+                  required: [getVehicleId]
+                  properties:
+                    getVehicleId:
+                      type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Trailer profiles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getVehicle:
+                        type: object
+                        properties:
+                          trailerProfiles:
+                            type: [object, "null"]
+                            properties:
+                              trailerDefault:
+                                $ref: "#/components/schemas/TrailerProfile"
+                              trailer1:
+                                $ref: "#/components/schemas/TrailerProfile"
+                              trailer2:
+                                $ref: "#/components/schemas/TrailerProfile"
+                              trailer3:
+                                $ref: "#/components/schemas/TrailerProfile"
+
+  # ── Gear Shop ───────────────────────────────────────────────
+  /orders/graphql#SearchShopProductsBySkus:
+    post:
+      tags: [Gear Shop]
+      operationId: searchShopProductsBySkus
+      summary: Search gear shop products
+      description: Returns product details from the Gear Shop for a list of SKUs. Does not require user authentication.
+      parameters:
+        - name: csrf-token
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: dc-cid
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: x-datadog-origin
+          in: header
+          required: true
+          schema:
+            type: string
+            example: rum
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: SearchShopProductsBySkus
+                variables:
+                  type: object
+                  required: [skus]
+                  properties:
+                    country:
+                      type: string
+                      default: US
+                    skus:
+                      type: array
+                      items:
+                        type: string
+                    pageInfo:
+                      type: object
+                      properties:
+                        from:
+                          type: integer
+                        size:
+                          type: integer
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Product search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      searchProducts:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                          size:
+                            type: integer
+                          from:
+                            type: integer
+                          data:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                sku:
+                                  type: string
+                                title:
+                                  type: string
+                                brand:
+                                  type: string
+                                rivianShopStatus:
+                                  type: string
+                                price:
+                                  type: object
+                                  properties:
+                                    listPrice:
+                                      type: object
+                                      properties:
+                                        amount:
+                                          type: number
+                                        currency:
+                                          type: string
+                                dimensionValues:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      name:
+                                        type: string
+                                      valueName:
+                                        type: string
+                                      localizedStrings:
+                                        type: string
+                                channels:
+                                  type: array
+                                  items:
+                                    type: object
+                                channelAttributes:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      attributeId:
+                                        type: string
+                                      name:
+                                        type: string
+                                      channel:
+                                        type: string
+                                      value:
+                                        type: string
+
+  /orders/graphql#SearchShopPricingBySku:
+    post:
+      tags: [Gear Shop]
+      operationId: searchShopPricingBySku
+      summary: Get gear shop pricing
+      description: Returns pricing details for products by SKU. Does not require user authentication.
+      parameters:
+        - name: csrf-token
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: dc-cid
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: x-datadog-origin
+          in: header
+          required: true
+          schema:
+            type: string
+            example: rum
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationName:
+                  type: string
+                  example: SearchShopPricingBySku
+                variables:
+                  type: object
+                  required: [skus]
+                  properties:
+                    country:
+                      type: string
+                      default: US
+                    skus:
+                      type: array
+                      items:
+                        type: string
+                    pageInfo:
+                      type: object
+                      properties:
+                        from:
+                          type: integer
+                        size:
+                          type: integer
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Pricing results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      searchProducts:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                          size:
+                            type: integer
+                          from:
+                            type: integer
+                          data:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                sku:
+                                  type: string
+                                price:
+                                  type: object
+                                  properties:
+                                    listPrice:
+                                      type: object
+                                      properties:
+                                        amount:
+                                          type: number
+                                        currency:
+                                          type: string
+
+  # ── Configurator ────────────────────────────────────────────
+  /rivian-main/c_fill,w_1920/c_crop,h_1100,g_south,y_178/compositor/{vehicle}/{view}/{options}:
+    servers:
+      - url: https://media.rivian.com
+    get:
+      tags: [Configurator]
+      operationId: getConfiguratorImage
+      summary: Get configurator image
+      description: |
+        Generates a rendered image of a vehicle configuration. No authentication required.
+
+        **Option codes:**
+        - Package: PKG-LCH, PKG-ADV, PKG-EXP, PKG-ASC
+        - Paint: EXP-LSV, EXP-GWT, EXP-CRD, EXP-MDN, EXP-RBL, EXP-LST, EXP-FGR, EXP-LGR, EXP-ELG, EXP-CYL, EXP-SBL
+        - Wheels: WHL-0A1, WHL-0AD, WHL-0A2, WHL-1RD, WHL-2SS, WHL-2SD, WHL-2AR, WHL-0BS, WHL-2SP, WHL-2SB, WHL-0DD
+        - Interior: INT-BMP, INT-GYP, INT-GRP
+        - Battery: BAT-C01, BAT-B01, BAT-A01
+        - Motor: MOT-201, MOT-301, MOT-401
+        - Trim: ACTBDG-BRT, ACTBDG-DRK
+        - Generation: GEN-1, GEN-2
+      parameters:
+        - name: vehicle
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [r1t, r1s]
+        - name: view
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [front, rear, side, driver, backseats, studio]
+        - name: options
+          in: path
+          required: true
+          description: "Comma-separated version and option codes (e.g. 2023.1,actbdg-brt,bat-c01,exp-lsv,gen-2,mot-201,pkg-adv,whl-2ss,studio)"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Vehicle configuration image
+          content:
+            image/webp:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
