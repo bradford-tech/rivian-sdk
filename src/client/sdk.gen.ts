@@ -3,7 +3,6 @@
 import { client } from './client.gen.js';
 import type { Client, Options as Options2, TDataShape } from './client/index.js';
 import type { ChargerDetailsData, ChargerDetailsResponses, CheckByRivianIdData, CheckByRivianIdResponses, CreateCsrfTokenData, CreateCsrfTokenResponses, CurrentUserForLoginData, CurrentUserForLoginResponses, DeliveryData, DeliveryResponses, DisenrollPhoneData, DisenrollPhoneResponses, EnrollPhoneData, EnrollPhoneResponses, FinanceSummaryData, FinanceSummaryResponses, GetChargingScheduleData, GetChargingScheduleResponses, GetCompletedSessionSummariesData, GetCompletedSessionSummariesResponses, GetConfiguratorImageData, GetConfiguratorImageResponses, GetEstimatedRangeData, GetEstimatedRangeResponses, GetLinkedEmailForRivianIdData, GetLinkedEmailForRivianIdResponses, GetLiveSessionDataData, GetLiveSessionDataResponses, GetLiveSessionHistoryData, GetLiveSessionHistoryResponses, GetNonRivianUserSessionData, GetNonRivianUserSessionResponses, GetOtaUpdateDetailsData, GetOtaUpdateDetailsResponses, GetProvisionedCampSpeakersData, GetProvisionedCampSpeakersResponses, GetRegisteredWallboxesData, GetRegisteredWallboxesResponses, GetSavedTripsData, GetSavedTripsResponses, GetTrailerProfilesData, GetTrailerProfilesResponses, GetUserInfoData, GetUserInfoResponses, GetVehicleCommandData, GetVehicleCommandResponses, GetVehicleData, GetVehicleImagesData, GetVehicleImagesResponses, GetVehicleLastConnectionData, GetVehicleLastConnectionResponses, GetVehicleResponses, GetVehicleStateData, GetVehicleStateResponses, GetVehicleWheelImageData, GetVehicleWheelImageResponses, GetWallboxStatusData, GetWallboxStatusResponses, LoginData, LoginResponses, LoginWithOtpData, LoginWithOtpResponses, OrderData, OrderResponses, ParseAndShareLocationToVehicleData, ParseAndShareLocationToVehicleResponses, PaymentMethodsData, PaymentMethodsResponses, PlacesData, PlacesResponses, PlanTripData, PlanTripResponses, RegisterPushNotificationTokenData, RegisterPushNotificationTokenResponses, SaveTripData, SaveTripResponses, SearchOrdersData, SearchOrdersResponses, SearchShopPricingBySkuData, SearchShopPricingBySkuResponses, SearchShopProductsBySkusData, SearchShopProductsBySkusResponses, SendVehicleCommandData, SendVehicleCommandResponses, SetChargingScheduleData, SetChargingScheduleResponses, SetVehicleNameData, SetVehicleNameResponses, SupportedFeaturesData, SupportedFeaturesResponses, TransactionStatusData, TransactionStatusResponses, UpdateWallboxData, UpdateWallboxResponses, UserData, UserResponses, VehicleOrdersData, VehicleOrdersResponses, VehicleSubscriptionsData } from './types.gen.js';
-import { zChargerDetailsData, zChargerDetailsResponse, zCheckByRivianIdData, zCheckByRivianIdResponse, zCreateCsrfTokenData, zCreateCsrfTokenResponse2, zCurrentUserForLoginData, zCurrentUserForLoginResponse, zDeliveryData, zDeliveryResponse, zDisenrollPhoneData, zDisenrollPhoneResponse, zEnrollPhoneData, zEnrollPhoneResponse, zFinanceSummaryData, zFinanceSummaryResponse, zGetChargingScheduleData, zGetChargingScheduleResponse, zGetCompletedSessionSummariesData, zGetCompletedSessionSummariesResponse, zGetConfiguratorImageData, zGetConfiguratorImageResponse, zGetEstimatedRangeData, zGetEstimatedRangeResponse, zGetLinkedEmailForRivianIdData, zGetLinkedEmailForRivianIdResponse, zGetLiveSessionDataData, zGetLiveSessionDataResponse, zGetLiveSessionHistoryData, zGetLiveSessionHistoryResponse, zGetNonRivianUserSessionData, zGetNonRivianUserSessionResponse, zGetOtaUpdateDetailsData, zGetOtaUpdateDetailsResponse, zGetProvisionedCampSpeakersData, zGetProvisionedCampSpeakersResponse, zGetRegisteredWallboxesData, zGetRegisteredWallboxesResponse, zGetSavedTripsData, zGetSavedTripsResponse, zGetTrailerProfilesData, zGetTrailerProfilesResponse, zGetUserInfoData, zGetUserInfoResponse, zGetVehicleCommandData, zGetVehicleCommandResponse, zGetVehicleData, zGetVehicleImagesData, zGetVehicleImagesResponse, zGetVehicleLastConnectionData, zGetVehicleLastConnectionResponse, zGetVehicleResponse, zGetVehicleStateData, zGetVehicleStateResponse, zGetVehicleWheelImageData, zGetVehicleWheelImageResponse, zGetWallboxStatusData, zGetWallboxStatusResponse, zLoginData, zLoginResponse2, zLoginWithOtpData, zLoginWithOtpResponse, zOrderData, zOrderResponse, zParseAndShareLocationToVehicleData, zParseAndShareLocationToVehicleResponse, zPaymentMethodsData, zPaymentMethodsResponse, zPlacesData, zPlacesResponse, zPlanTripData, zPlanTripResponse, zRegisterPushNotificationTokenData, zRegisterPushNotificationTokenResponse, zSaveTripData, zSaveTripResponse, zSearchOrdersData, zSearchOrdersResponse, zSearchShopPricingBySkuData, zSearchShopPricingBySkuResponse, zSearchShopProductsBySkusData, zSearchShopProductsBySkusResponse, zSendVehicleCommandData, zSendVehicleCommandResponse, zSetChargingScheduleData, zSetChargingScheduleResponse, zSetVehicleNameData, zSetVehicleNameResponse, zSupportedFeaturesData, zSupportedFeaturesResponse, zTransactionStatusData, zTransactionStatusResponse, zUpdateWallboxData, zUpdateWallboxResponse, zUserData, zUserResponse, zVehicleOrdersData, zVehicleOrdersResponse, zVehicleSubscriptionsData } from './zod.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -27,8 +26,6 @@ export class Authentication {
      */
     public static createCsrfToken<ThrowOnError extends boolean = false>(options: Options<CreateCsrfTokenData, ThrowOnError>) {
         return (options.client ?? client).post<CreateCsrfTokenResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zCreateCsrfTokenData.parseAsync(data),
-            responseValidator: async (data) => await zCreateCsrfTokenResponse2.parseAsync(data),
             url: '/gateway/graphql#CreateCSRFToken',
             ...options,
             headers: {
@@ -47,8 +44,6 @@ export class Authentication {
      */
     public static login<ThrowOnError extends boolean = false>(options: Options<LoginData, ThrowOnError>) {
         return (options.client ?? client).post<LoginResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zLoginData.parseAsync(data),
-            responseValidator: async (data) => await zLoginResponse2.parseAsync(data),
             url: '/gateway/graphql#Login',
             ...options,
             headers: {
@@ -65,8 +60,6 @@ export class Authentication {
      */
     public static loginWithOtp<ThrowOnError extends boolean = false>(options: Options<LoginWithOtpData, ThrowOnError>) {
         return (options.client ?? client).post<LoginWithOtpResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zLoginWithOtpData.parseAsync(data),
-            responseValidator: async (data) => await zLoginWithOtpResponse.parseAsync(data),
             url: '/gateway/graphql#LoginWithOTP',
             ...options,
             headers: {
@@ -85,8 +78,6 @@ export class Account {
      */
     public static getUserInfo<ThrowOnError extends boolean = false>(options: Options<GetUserInfoData, ThrowOnError>) {
         return (options.client ?? client).post<GetUserInfoResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetUserInfoData.parseAsync(data),
-            responseValidator: async (data) => await zGetUserInfoResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -108,8 +99,6 @@ export class Account {
      */
     public static currentUserForLogin<ThrowOnError extends boolean = false>(options: Options<CurrentUserForLoginData, ThrowOnError>) {
         return (options.client ?? client).post<CurrentUserForLoginResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zCurrentUserForLoginData.parseAsync(data),
-            responseValidator: async (data) => await zCurrentUserForLoginResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -131,8 +120,6 @@ export class Account {
      */
     public static vehicleOrders<ThrowOnError extends boolean = false>(options: Options<VehicleOrdersData, ThrowOnError>) {
         return (options.client ?? client).post<VehicleOrdersResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zVehicleOrdersData.parseAsync(data),
-            responseValidator: async (data) => await zVehicleOrdersResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -154,8 +141,6 @@ export class Account {
      */
     public static delivery<ThrowOnError extends boolean = false>(options: Options<DeliveryData, ThrowOnError>) {
         return (options.client ?? client).post<DeliveryResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zDeliveryData.parseAsync(data),
-            responseValidator: async (data) => await zDeliveryResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -177,8 +162,6 @@ export class Account {
      */
     public static order<ThrowOnError extends boolean = false>(options: Options<OrderData, ThrowOnError>) {
         return (options.client ?? client).post<OrderResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zOrderData.parseAsync(data),
-            responseValidator: async (data) => await zOrderResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -200,8 +183,6 @@ export class Account {
      */
     public static searchOrders<ThrowOnError extends boolean = false>(options: Options<SearchOrdersData, ThrowOnError>) {
         return (options.client ?? client).post<SearchOrdersResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zSearchOrdersData.parseAsync(data),
-            responseValidator: async (data) => await zSearchOrdersResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -223,8 +204,6 @@ export class Account {
      */
     public static user<ThrowOnError extends boolean = false>(options: Options<UserData, ThrowOnError>) {
         return (options.client ?? client).post<UserResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zUserData.parseAsync(data),
-            responseValidator: async (data) => await zUserResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -246,8 +225,6 @@ export class Account {
      */
     public static paymentMethods<ThrowOnError extends boolean = false>(options: Options<PaymentMethodsData, ThrowOnError>) {
         return (options.client ?? client).post<PaymentMethodsResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zPaymentMethodsData.parseAsync(data),
-            responseValidator: async (data) => await zPaymentMethodsResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -269,8 +246,6 @@ export class Account {
      */
     public static transactionStatus<ThrowOnError extends boolean = false>(options: Options<TransactionStatusData, ThrowOnError>) {
         return (options.client ?? client).post<TransactionStatusResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zTransactionStatusData.parseAsync(data),
-            responseValidator: async (data) => await zTransactionStatusResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -292,8 +267,6 @@ export class Account {
      */
     public static financeSummary<ThrowOnError extends boolean = false>(options: Options<FinanceSummaryData, ThrowOnError>) {
         return (options.client ?? client).post<FinanceSummaryResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zFinanceSummaryData.parseAsync(data),
-            responseValidator: async (data) => await zFinanceSummaryResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -315,8 +288,6 @@ export class Account {
      */
     public static getProvisionedCampSpeakers<ThrowOnError extends boolean = false>(options: Options<GetProvisionedCampSpeakersData, ThrowOnError>) {
         return (options.client ?? client).post<GetProvisionedCampSpeakersResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetProvisionedCampSpeakersData.parseAsync(data),
-            responseValidator: async (data) => await zGetProvisionedCampSpeakersResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -338,8 +309,6 @@ export class Account {
      */
     public static getRegisteredWallboxes<ThrowOnError extends boolean = false>(options: Options<GetRegisteredWallboxesData, ThrowOnError>) {
         return (options.client ?? client).post<GetRegisteredWallboxesResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetRegisteredWallboxesData.parseAsync(data),
-            responseValidator: async (data) => await zGetRegisteredWallboxesResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -363,8 +332,6 @@ export class Charging {
      */
     public static getWallboxStatus<ThrowOnError extends boolean = false>(options: Options<GetWallboxStatusData, ThrowOnError>) {
         return (options.client ?? client).post<GetWallboxStatusResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetWallboxStatusData.parseAsync(data),
-            responseValidator: async (data) => await zGetWallboxStatusResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -386,8 +353,6 @@ export class Charging {
      */
     public static updateWallbox<ThrowOnError extends boolean = false>(options: Options<UpdateWallboxData, ThrowOnError>) {
         return (options.client ?? client).post<UpdateWallboxResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zUpdateWallboxData.parseAsync(data),
-            responseValidator: async (data) => await zUpdateWallboxResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -409,8 +374,6 @@ export class Charging {
      */
     public static getCompletedSessionSummaries<ThrowOnError extends boolean = false>(options: Options<GetCompletedSessionSummariesData, ThrowOnError>) {
         return (options.client ?? client).post<GetCompletedSessionSummariesResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetCompletedSessionSummariesData.parseAsync(data),
-            responseValidator: async (data) => await zGetCompletedSessionSummariesResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -432,8 +395,6 @@ export class Charging {
      */
     public static getLiveSessionData<ThrowOnError extends boolean = false>(options: Options<GetLiveSessionDataData, ThrowOnError>) {
         return (options.client ?? client).post<GetLiveSessionDataResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetLiveSessionDataData.parseAsync(data),
-            responseValidator: async (data) => await zGetLiveSessionDataResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -455,8 +416,6 @@ export class Charging {
      */
     public static getLiveSessionHistory<ThrowOnError extends boolean = false>(options: Options<GetLiveSessionHistoryData, ThrowOnError>) {
         return (options.client ?? client).post<GetLiveSessionHistoryResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetLiveSessionHistoryData.parseAsync(data),
-            responseValidator: async (data) => await zGetLiveSessionHistoryResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -478,8 +437,6 @@ export class Charging {
      */
     public static getNonRivianUserSession<ThrowOnError extends boolean = false>(options: Options<GetNonRivianUserSessionData, ThrowOnError>) {
         return (options.client ?? client).post<GetNonRivianUserSessionResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetNonRivianUserSessionData.parseAsync(data),
-            responseValidator: async (data) => await zGetNonRivianUserSessionResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -501,8 +458,6 @@ export class Charging {
      */
     public static checkByRivianId<ThrowOnError extends boolean = false>(options: Options<CheckByRivianIdData, ThrowOnError>) {
         return (options.client ?? client).post<CheckByRivianIdResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zCheckByRivianIdData.parseAsync(data),
-            responseValidator: async (data) => await zCheckByRivianIdResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -524,8 +479,6 @@ export class Charging {
      */
     public static getLinkedEmailForRivianId<ThrowOnError extends boolean = false>(options: Options<GetLinkedEmailForRivianIdData, ThrowOnError>) {
         return (options.client ?? client).post<GetLinkedEmailForRivianIdResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetLinkedEmailForRivianIdData.parseAsync(data),
-            responseValidator: async (data) => await zGetLinkedEmailForRivianIdResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -547,8 +500,6 @@ export class Charging {
      */
     public static chargerDetails<ThrowOnError extends boolean = false>(options: Options<ChargerDetailsData, ThrowOnError>) {
         return (options.client ?? client).post<ChargerDetailsResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zChargerDetailsData.parseAsync(data),
-            responseValidator: async (data) => await zChargerDetailsResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -570,8 +521,6 @@ export class Charging {
      */
     public static setChargingSchedule<ThrowOnError extends boolean = false>(options: Options<SetChargingScheduleData, ThrowOnError>) {
         return (options.client ?? client).post<SetChargingScheduleResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zSetChargingScheduleData.parseAsync(data),
-            responseValidator: async (data) => await zSetChargingScheduleResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -593,8 +542,6 @@ export class Charging {
      */
     public static getChargingSchedule<ThrowOnError extends boolean = false>(options: Options<GetChargingScheduleData, ThrowOnError>) {
         return (options.client ?? client).post<GetChargingScheduleResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetChargingScheduleData.parseAsync(data),
-            responseValidator: async (data) => await zGetChargingScheduleResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -620,8 +567,6 @@ export class VehicleControls {
      */
     public static enrollPhone<ThrowOnError extends boolean = false>(options: Options<EnrollPhoneData, ThrowOnError>) {
         return (options.client ?? client).post<EnrollPhoneResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zEnrollPhoneData.parseAsync(data),
-            responseValidator: async (data) => await zEnrollPhoneResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -643,8 +588,6 @@ export class VehicleControls {
      */
     public static disenrollPhone<ThrowOnError extends boolean = false>(options: Options<DisenrollPhoneData, ThrowOnError>) {
         return (options.client ?? client).post<DisenrollPhoneResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zDisenrollPhoneData.parseAsync(data),
-            responseValidator: async (data) => await zDisenrollPhoneResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -668,8 +611,6 @@ export class VehicleControls {
      */
     public static sendVehicleCommand<ThrowOnError extends boolean = false>(options: Options<SendVehicleCommandData, ThrowOnError>) {
         return (options.client ?? client).post<SendVehicleCommandResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zSendVehicleCommandData.parseAsync(data),
-            responseValidator: async (data) => await zSendVehicleCommandResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -691,8 +632,6 @@ export class VehicleControls {
      */
     public static getVehicleCommand<ThrowOnError extends boolean = false>(options: Options<GetVehicleCommandData, ThrowOnError>) {
         return (options.client ?? client).post<GetVehicleCommandResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetVehicleCommandData.parseAsync(data),
-            responseValidator: async (data) => await zGetVehicleCommandResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -714,8 +653,6 @@ export class VehicleControls {
      */
     public static parseAndShareLocationToVehicle<ThrowOnError extends boolean = false>(options: Options<ParseAndShareLocationToVehicleData, ThrowOnError>) {
         return (options.client ?? client).post<ParseAndShareLocationToVehicleResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zParseAndShareLocationToVehicleData.parseAsync(data),
-            responseValidator: async (data) => await zParseAndShareLocationToVehicleResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -739,8 +676,6 @@ export class VehicleInfo {
      */
     public static getVehicleState<ThrowOnError extends boolean = false>(options: Options<GetVehicleStateData, ThrowOnError>) {
         return (options.client ?? client).post<GetVehicleStateResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetVehicleStateData.parseAsync(data),
-            responseValidator: async (data) => await zGetVehicleStateResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -762,8 +697,6 @@ export class VehicleInfo {
      */
     public static getVehicleLastConnection<ThrowOnError extends boolean = false>(options: Options<GetVehicleLastConnectionData, ThrowOnError>) {
         return (options.client ?? client).post<GetVehicleLastConnectionResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetVehicleLastConnectionData.parseAsync(data),
-            responseValidator: async (data) => await zGetVehicleLastConnectionResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -785,8 +718,6 @@ export class VehicleInfo {
      */
     public static getVehicle<ThrowOnError extends boolean = false>(options: Options<GetVehicleData, ThrowOnError>) {
         return (options.client ?? client).post<GetVehicleResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetVehicleData.parseAsync(data),
-            responseValidator: async (data) => await zGetVehicleResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -808,8 +739,6 @@ export class VehicleInfo {
      */
     public static getOtaUpdateDetails<ThrowOnError extends boolean = false>(options: Options<GetOtaUpdateDetailsData, ThrowOnError>) {
         return (options.client ?? client).post<GetOtaUpdateDetailsResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetOtaUpdateDetailsData.parseAsync(data),
-            responseValidator: async (data) => await zGetOtaUpdateDetailsResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -831,8 +760,6 @@ export class VehicleInfo {
      */
     public static getVehicleImages<ThrowOnError extends boolean = false>(options: Options<GetVehicleImagesData, ThrowOnError>) {
         return (options.client ?? client).post<GetVehicleImagesResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetVehicleImagesData.parseAsync(data),
-            responseValidator: async (data) => await zGetVehicleImagesResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -854,8 +781,6 @@ export class VehicleInfo {
      */
     public static getEstimatedRange<ThrowOnError extends boolean = false>(options: Options<GetEstimatedRangeData, ThrowOnError>) {
         return (options.client ?? client).post<GetEstimatedRangeResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetEstimatedRangeData.parseAsync(data),
-            responseValidator: async (data) => await zGetEstimatedRangeResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -877,8 +802,6 @@ export class VehicleInfo {
      */
     public static setVehicleName<ThrowOnError extends boolean = false>(options: Options<SetVehicleNameData, ThrowOnError>) {
         return (options.client ?? client).post<SetVehicleNameResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zSetVehicleNameData.parseAsync(data),
-            responseValidator: async (data) => await zSetVehicleNameResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -900,8 +823,6 @@ export class VehicleInfo {
      */
     public static supportedFeatures<ThrowOnError extends boolean = false>(options: Options<SupportedFeaturesData, ThrowOnError>) {
         return (options.client ?? client).post<SupportedFeaturesResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zSupportedFeaturesData.parseAsync(data),
-            responseValidator: async (data) => await zSupportedFeaturesResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -923,8 +844,6 @@ export class VehicleInfo {
      */
     public static registerPushNotificationToken<ThrowOnError extends boolean = false>(options: Options<RegisterPushNotificationTokenData, ThrowOnError>) {
         return (options.client ?? client).post<RegisterPushNotificationTokenResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zRegisterPushNotificationTokenData.parseAsync(data),
-            responseValidator: async (data) => await zRegisterPushNotificationTokenResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -948,12 +867,7 @@ export class VehicleInfo {
      *
      */
     public static getVehicleWheelImage<ThrowOnError extends boolean = false>(options: Options<GetVehicleWheelImageData, ThrowOnError>) {
-        return (options.client ?? client).get<GetVehicleWheelImageResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetVehicleWheelImageData.parseAsync(data),
-            responseValidator: async (data) => await zGetVehicleWheelImageResponse.parseAsync(data),
-            url: '/mobile/static/img/v1/features/wheels/{wheelOption}.png',
-            ...options
-        });
+        return (options.client ?? client).get<GetVehicleWheelImageResponses, unknown, ThrowOnError>({ url: '/mobile/static/img/v1/features/wheels/{wheelOption}.png', ...options });
     }
     
     /**
@@ -984,11 +898,7 @@ export class VehicleInfo {
      *
      */
     public static vehicleSubscriptions<ThrowOnError extends boolean = false>(options: Options<VehicleSubscriptionsData, ThrowOnError>) {
-        return (options.client ?? client).get<unknown, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zVehicleSubscriptionsData.parseAsync(data),
-            url: '/gql-consumer-subscriptions/graphql',
-            ...options
-        });
+        return (options.client ?? client).get<unknown, unknown, ThrowOnError>({ url: '/gql-consumer-subscriptions/graphql', ...options });
     }
 }
 
@@ -1000,8 +910,6 @@ export class TripPlanning {
      */
     public static places<ThrowOnError extends boolean = false>(options: Options<PlacesData, ThrowOnError>) {
         return (options.client ?? client).post<PlacesResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zPlacesData.parseAsync(data),
-            responseValidator: async (data) => await zPlacesResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -1023,8 +931,6 @@ export class TripPlanning {
      */
     public static planTrip<ThrowOnError extends boolean = false>(options: Options<PlanTripData, ThrowOnError>) {
         return (options.client ?? client).post<PlanTripResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zPlanTripData.parseAsync(data),
-            responseValidator: async (data) => await zPlanTripResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -1046,8 +952,6 @@ export class TripPlanning {
      */
     public static saveTrip<ThrowOnError extends boolean = false>(options: Options<SaveTripData, ThrowOnError>) {
         return (options.client ?? client).post<SaveTripResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zSaveTripData.parseAsync(data),
-            responseValidator: async (data) => await zSaveTripResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -1069,8 +973,6 @@ export class TripPlanning {
      */
     public static getSavedTrips<ThrowOnError extends boolean = false>(options: Options<GetSavedTripsData, ThrowOnError>) {
         return (options.client ?? client).post<GetSavedTripsResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetSavedTripsData.parseAsync(data),
-            responseValidator: async (data) => await zGetSavedTripsResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -1092,8 +994,6 @@ export class TripPlanning {
      */
     public static getTrailerProfiles<ThrowOnError extends boolean = false>(options: Options<GetTrailerProfilesData, ThrowOnError>) {
         return (options.client ?? client).post<GetTrailerProfilesResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetTrailerProfilesData.parseAsync(data),
-            responseValidator: async (data) => await zGetTrailerProfilesResponse.parseAsync(data),
             security: [
                 { name: 'a-sess', type: 'apiKey' },
                 { name: 'u-sess', type: 'apiKey' },
@@ -1117,8 +1017,6 @@ export class GearShop {
      */
     public static searchShopProductsBySkus<ThrowOnError extends boolean = false>(options: Options<SearchShopProductsBySkusData, ThrowOnError>) {
         return (options.client ?? client).post<SearchShopProductsBySkusResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zSearchShopProductsBySkusData.parseAsync(data),
-            responseValidator: async (data) => await zSearchShopProductsBySkusResponse.parseAsync(data),
             url: '/orders/graphql#SearchShopProductsBySkus',
             ...options,
             headers: {
@@ -1135,8 +1033,6 @@ export class GearShop {
      */
     public static searchShopPricingBySku<ThrowOnError extends boolean = false>(options: Options<SearchShopPricingBySkuData, ThrowOnError>) {
         return (options.client ?? client).post<SearchShopPricingBySkuResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zSearchShopPricingBySkuData.parseAsync(data),
-            responseValidator: async (data) => await zSearchShopPricingBySkuResponse.parseAsync(data),
             url: '/orders/graphql#SearchShopPricingBySku',
             ...options,
             headers: {
@@ -1165,11 +1061,6 @@ export class Configurator {
      *
      */
     public static getConfiguratorImage<ThrowOnError extends boolean = false>(options: Options<GetConfiguratorImageData, ThrowOnError>) {
-        return (options.client ?? client).get<GetConfiguratorImageResponses, unknown, ThrowOnError>({
-            requestValidator: async (data) => await zGetConfiguratorImageData.parseAsync(data),
-            responseValidator: async (data) => await zGetConfiguratorImageResponse.parseAsync(data),
-            url: '/rivian-main/c_fill,w_1920/c_crop,h_1100,g_south,y_178/compositor/{vehicle}/{view}/{options}',
-            ...options
-        });
+        return (options.client ?? client).get<GetConfiguratorImageResponses, unknown, ThrowOnError>({ url: '/rivian-main/c_fill,w_1920/c_crop,h_1100,g_south,y_178/compositor/{vehicle}/{view}/{options}', ...options });
     }
 }

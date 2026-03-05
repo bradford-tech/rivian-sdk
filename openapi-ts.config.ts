@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [
     "@hey-api/typescript",
     {
-      name: "@hey-api/client-ofetch",
+      name: "@hey-api/client-fetch",
     },
     {
       name: "@hey-api/sdk",
@@ -17,12 +17,10 @@ export default defineConfig({
         strategy: "byTags",
         containerName: "{{name}}",
       },
-      validator: "zod",
     },
     {
       name: "@hey-api/transformers",
       dates: true,
     },
-    "zod",
   ],
 });

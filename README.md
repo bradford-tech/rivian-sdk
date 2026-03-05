@@ -146,41 +146,41 @@ Hand-written auth layer. See [Authentication](#authentication) above.
 
 | Method                                | Description                                                                 | Status |
 | ------------------------------------- | --------------------------------------------------------------------------- | ------ |
-| `login(email, password)`              | Authenticate with email and password. Returns `{ otpRequired, otpToken? }`. | ●     |
-| `verifyOtp(email, otpCode, otpToken)` | Complete MFA login with an OTP code.                                        | ●     |
+| `login(email, password)`              | Authenticate with email and password. Returns `{ otpRequired, otpToken? }`. | ●      |
+| `verifyOtp(email, otpCode, otpToken)` | Complete MFA login with an OTP code.                                        | ●      |
 | `setTokens(tokens)`                   | Set tokens manually.                                                        | ○      |
 | `getTokens()`                         | Get current tokens.                                                         | ○      |
 | `logout()`                            | Clear all tokens from memory and storage.                                   | ○      |
-| `isAuthenticated`                     | `true` if all three session tokens are present.                             | ●     |
+| `isAuthenticated`                     | `true` if all three session tokens are present.                             | ●      |
 
 ### `rivian.account`
 
 | Method                         | Description                    | Status |
 | ------------------------------ | ------------------------------ | ------ |
-| `getUserInfo()`                | Get user account information   | ●     |
-| `currentUserForLogin()`        | Get current user configuration | ●     |
-| `vehicleOrders()`              | List vehicle orders            | ○     |
+| `getUserInfo()`                | Get user account information   | ●      |
+| `currentUserForLogin()`        | Get current user configuration | ●      |
+| `vehicleOrders()`              | List vehicle orders            | ○      |
 | `delivery()`                   | Get delivery information       | ○      |
 | `order()`                      | Get order details              | ○      |
-| `searchOrders()`               | Search retail orders           | ●     |
-| `user()`                       | Get user info for orders       | ●     |
-| `paymentMethods()`             | Get payment methods            | ●     |
+| `searchOrders()`               | Search retail orders           | ●      |
+| `user()`                       | Get user info for orders       | ●      |
+| `paymentMethods()`             | Get payment methods            | ●      |
 | `transactionStatus()`          | Get transaction status         | ○      |
 | `financeSummary()`             | Get finance summary            | ○      |
-| `getProvisionedCampSpeakers()` | List provisioned camp speakers | ●     |
-| `getRegisteredWallboxes()`     | List registered wallboxes      | ●     |
+| `getProvisionedCampSpeakers()` | List provisioned camp speakers | ●      |
+| `getRegisteredWallboxes()`     | List registered wallboxes      | ●      |
 
 ### `rivian.charging`
 
 | Method                           | Description                       | Status |
 | -------------------------------- | --------------------------------- | ------ |
-| `getCompletedSessionSummaries()` | Get completed session summaries   | ●     |
-| `getLiveSessionData()`           | Get live charging session data    | ●     |
-| `getLiveSessionHistory()`        | Get live charging session history | ●     |
-| `getNonRivianUserSession()`      | Get non-Rivian charging session   | ●     |
-| `checkByRivianId()`              | Check linked third-party accounts | ●     |
-| `getLinkedEmailForRivianId()`    | Get linked third-party email      | ●     |
-| `getChargingSchedule()`          | Get charging schedule             | ●     |
+| `getCompletedSessionSummaries()` | Get completed session summaries   | ●      |
+| `getLiveSessionData()`           | Get live charging session data    | ●      |
+| `getLiveSessionHistory()`        | Get live charging session history | ●      |
+| `getNonRivianUserSession()`      | Get non-Rivian charging session   | ●      |
+| `checkByRivianId()`              | Check linked third-party accounts | ●      |
+| `getLinkedEmailForRivianId()`    | Get linked third-party email      | ●      |
+| `getChargingSchedule()`          | Get charging schedule             | ●      |
 | `getWallboxStatus()`             | Get wallbox status                | ○      |
 | `setChargingSchedule()`          | Set charging schedule             | ○      |
 | `updateWallbox()`                | Update wallbox name               | ○      |
@@ -190,12 +190,12 @@ Hand-written auth layer. See [Authentication](#authentication) above.
 
 | Method                            | Description                      | Status |
 | --------------------------------- | -------------------------------- | ------ |
-| `getVehicleState()`               | Get vehicle state                | ●     |
-| `getVehicleLastConnection()`      | Get last cloud connection time   | ●     |
-| `getVehicle()`                    | Get vehicle details              | ●     |
-| `getOtaUpdateDetails()`           | Get OTA update details           | ●     |
-| `getEstimatedRange()`             | Get estimated range              | ●     |
-| `supportedFeatures()`             | Get supported features           | ●     |
+| `getVehicleState()`               | Get vehicle state                | ●      |
+| `getVehicleLastConnection()`      | Get last cloud connection time   | ●      |
+| `getVehicle()`                    | Get vehicle details              | ●      |
+| `getOtaUpdateDetails()`           | Get OTA update details           | ●      |
+| `getEstimatedRange()`             | Get estimated range              | ●      |
+| `supportedFeatures()`             | Get supported features           | ●      |
 | `getVehicleImages()`              | Get vehicle images               | ○      |
 | `getVehicleWheelImage()`          | Get wheel image                  | ○      |
 | `setVehicleName()`                | Set vehicle name                 | ○      |
@@ -215,8 +215,8 @@ Hand-written auth layer. See [Authentication](#authentication) above.
 
 | Method                 | Description                     | Status |
 | ---------------------- | ------------------------------- | ------ |
-| `getSavedTrips()`      | Get saved trips                 | ●     |
-| `getTrailerProfiles()` | Get trailer towing profiles     | ●     |
+| `getSavedTrips()`      | Get saved trips                 | ●      |
+| `getTrailerProfiles()` | Get trailer towing profiles     | ●      |
 | `places()`             | Search for places               | ○      |
 | `planTrip()`           | Plan a trip with charging stops | ○      |
 | `saveTrip()`           | Save a trip                     | ○      |
@@ -225,8 +225,8 @@ Hand-written auth layer. See [Authentication](#authentication) above.
 
 | Method                       | Description                      | Status |
 | ---------------------------- | -------------------------------- | ------ |
-| `searchShopProductsBySkus()` | Search gear shop products by SKU | ●     |
-| `searchShopPricingBySku()`   | Get pricing for a gear shop item | ●     |
+| `searchShopProductsBySkus()` | Search gear shop products by SKU | ●      |
+| `searchShopPricingBySku()`   | Get pricing for a gear shop item | ●      |
 
 ### `rivian.configurator`
 
@@ -240,7 +240,7 @@ The Rivian API is GraphQL-over-REST — each operation sends a GraphQL query as 
 
 The generated code lives in `src/client/` and is committed to the repo. The hand-written auth layer (`src/auth.ts`) and client factory (`src/index.ts`) wrap the generated classes with a cleaner interface.
 
-Runtime dependencies are minimal: [`ofetch`](https://github.com/unjs/ofetch) for HTTP and [`zod`](https://zod.dev) for response validation.
+The SDK has zero runtime dependencies — it uses the native `fetch` API for HTTP.
 
 ## Types
 
