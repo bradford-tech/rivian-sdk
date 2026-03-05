@@ -410,18 +410,18 @@ export const zChargingSessionSummary = z.object({
 });
 
 export const zLiveSessionData = z.object({
-    isRivianCharger: z.boolean().optional(),
-    isFreeSession: z.boolean().optional(),
-    vehicleChargerState: zTimestampedValue.optional(),
-    chargerId: z.string().optional(),
-    startTime: z.string().datetime().optional(),
-    timeElapsed: z.string().optional(),
-    timeRemaining: zTimestampedValue.optional(),
-    kilometersChargedPerHour: zTimestampedValue.optional(),
-    power: zTimestampedValue.optional(),
-    rangeAddedThisSession: zTimestampedValue.optional(),
-    totalChargedEnergy: zTimestampedValue.optional(),
-    currentPrice: z.number().optional()
+    isRivianCharger: z.boolean().nullish(),
+    isFreeSession: z.boolean().nullish(),
+    vehicleChargerState: zTimestampedValue.nullish(),
+    chargerId: z.string().nullish(),
+    startTime: z.string().datetime().nullish(),
+    timeElapsed: z.string().nullish(),
+    timeRemaining: zTimestampedValue.nullish(),
+    kilometersChargedPerHour: zTimestampedValue.nullish(),
+    power: zTimestampedValue.nullish(),
+    rangeAddedThisSession: zTimestampedValue.nullish(),
+    totalChargedEnergy: zTimestampedValue.nullish(),
+    currentPrice: z.number().nullish()
 });
 
 export const zChargingSchedule = z.object({
@@ -754,7 +754,7 @@ export const zVehicleOrdersResponse = z.object({
         orders: z.object({
             data: z.array(zOrderSnapshot).optional()
         }).optional()
-    }).optional()
+    }).nullish()
 });
 
 export const zDeliveryData = z.object({
@@ -928,7 +928,7 @@ export const zUserResponse = z.object({
             }).optional(),
             phone: z.object({
                 formatted: z.string().optional()
-            }).optional(),
+            }).nullish(),
             firstName: z.string().optional(),
             lastName: z.string().optional(),
             addresses: z.array(z.object({
@@ -1244,8 +1244,8 @@ export const zGetLinkedEmailForRivianIdResponse = z.object({
     data: z.object({
         chargepoint: z.object({
             getLinkedEmailForRivianId: z.object({
-                email: z.string().optional()
-            }).optional()
+                email: z.string().nullish()
+            }).nullish()
         }).optional()
     }).optional()
 });
@@ -1317,7 +1317,7 @@ export const zGetChargingScheduleData = z.object({
 export const zGetChargingScheduleResponse = z.object({
     data: z.object({
         getVehicle: z.object({
-            chargingSchedules: z.array(zChargingSchedule).optional()
+            chargingSchedules: z.array(zChargingSchedule).nullish()
         }).optional()
     }).optional()
 });
@@ -1539,7 +1539,7 @@ export const zGetVehicleResponse = z.object({
                     type: z.string().optional(),
                     mappedIdentityId: z.string().optional(),
                     id: z.string().optional(),
-                    hrid: z.string().optional(),
+                    hrid: z.string().nullish(),
                     deviceName: z.string().optional(),
                     isPaired: z.boolean().optional(),
                     isEnabled: z.boolean().optional()

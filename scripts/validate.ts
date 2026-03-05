@@ -161,11 +161,17 @@ async function runEndpoint(
       const details = issues
         .map((i) => `  → ${i.path.join(".")}: ${i.message}`)
         .join("\n");
+      // Capture the raw response for debugging schema mismatches
+      const rawResponse =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response: unknown }).response
+          : undefined;
       return {
         namespace: def.namespace,
         name: def.name,
         outcome: "SCHEMA_MISMATCH",
         detail: details,
+        response: rawResponse,
       };
     }
 
@@ -293,7 +299,7 @@ const endpoints: EndpointDef[] = [
         body: {
           operationName: "vehicleOrders",
           query:
-            "query vehicleOrders { orders { data { id state configurationStatus fulfillmentSummaryStatus items { configuration { options { optionId optionName optionDetails { name attrs } groupId groupName type price { amount } } } } orderDate storeId type currency locale } } }",
+            "query vehicleOrders { orders { __typename data { __typename id state } } }",
         },
       }),
   },
@@ -333,12 +339,16 @@ const endpoints: EndpointDef[] = [
         body: {
           operationName: "searchOrders",
           variables: {
-            orderTypes: ["VEHICLE"],
-            pageInfo: { from: 0, size: 10 },
+            orderTypes: ["RETAIL"],
+            orderStates: null,
+            pageInfo: { from: 0, size: 5 },
+            dateRange: null,
+            sortFields: { orderDate: "DESC" },
           },
           query:
-            "query searchOrders($orderTypes: [String], $orderStates: [String], $dateRange: DateRange, $pageInfo: PageInfoInput) { searchOrders(orderTypes: $orderTypes, orderStates: $orderStates, dateRange: $dateRange, pageInfo: $pageInfo) { total data { id type state currency locale orderDate } } }",
+            "query searchOrders($input: UserOrderSearchInput!) { searchOrders(input: $input) { total data { id type orderDate state fulfillmentSummaryStatus items { id title type sku __typename } __typename } __typename } }",
         },
+        headers: { "dc-cid": "m-ios-rivian" },
       }),
   },
   {
@@ -349,8 +359,9 @@ const endpoints: EndpointDef[] = [
         body: {
           operationName: "user",
           query:
-            "query user { user { userId firstName lastName email address { country } vehicles { id name vin } } }",
+            "query user { user { email { email } phone { formatted } firstName lastName addresses { id type line1 line2 city state country postalCode } userId vehicles { id highestPriorityRole __typename } } }",
         },
+        headers: { "dc-cid": "m-ios-rivian" },
       }),
   },
   {
@@ -441,7 +452,7 @@ const endpoints: EndpointDef[] = [
           operationName: "getLiveSessionData",
           variables: { vehicleId: ctx.vehicleId! },
           query:
-            "query getLiveSessionData($vehicleId: String!) { getLiveSessionData(vehicleId: $vehicleId) { isRivianCharger isFreeSession vehicleChargerState { timeStamp value } chargerId startTime timeElapsed timeRemaining { timeStamp value } kilometersChargedPerHour { timeStamp value } power { timeStamp value } rangeAddedThisSession { timeStamp value } totalChargedEnergy { timeStamp value } currentPrice } }",
+            "query getLiveSessionData($vehicleId: ID) { getLiveSessionData(vehicleId: $vehicleId) { isRivianCharger isFreeSession vehicleChargerState { value updatedAt } chargerId startTime timeElapsed timeRemaining { value updatedAt } kilometersChargedPerHour { value updatedAt } power { value updatedAt } rangeAddedThisSession { value updatedAt } totalChargedEnergy { value updatedAt } currentPrice } }",
         },
       }),
   },
@@ -455,7 +466,7 @@ const endpoints: EndpointDef[] = [
           operationName: "getLiveSessionHistory",
           variables: { vehicleId: ctx.vehicleId! },
           query:
-            "query getLiveSessionHistory($vehicleId: String!) { getLiveSessionHistory(vehicleId: $vehicleId) { chartData { soc kw } } }",
+            "query getLiveSessionHistory($vehicleId: ID) { getLiveSessionHistory(vehicleId: $vehicleId) { chartData { kw time } } }",
         },
       }),
   },
@@ -478,7 +489,7 @@ const endpoints: EndpointDef[] = [
       c.charging.checkByRivianId({
         body: {
           operationName: "CheckByRivianId",
-          query: "query CheckByRivianId { checkByRivianId }",
+          query: "query CheckByRivianId { chargepoint { checkByRivianId } }",
         },
       }),
   },
@@ -488,9 +499,9 @@ const endpoints: EndpointDef[] = [
     call: (c) =>
       c.charging.getLinkedEmailForRivianId({
         body: {
-          operationName: "GetLinkedEmailForRivianId",
+          operationName: "getLinkedEmailForRivianId",
           query:
-            "query GetLinkedEmailForRivianId { getLinkedEmailForRivianId }",
+            "query getLinkedEmailForRivianId { chargepoint { getLinkedEmailForRivianId { email } } }",
         },
       }),
   },
@@ -515,10 +526,10 @@ const endpoints: EndpointDef[] = [
     call: (c, ctx) =>
       c.charging.getChargingSchedule({
         body: {
-          operationName: "getChargingSchedule",
+          operationName: "GetChargingSchedule",
           variables: { vehicleId: ctx.vehicleId! },
           query:
-            "query getChargingSchedule($vehicleId: String!) { getChargingSchedule(vehicleId: $vehicleId) { startTime duration location { latitude longitude } amperage enabled weekDays } }",
+            "query GetChargingSchedule($vehicleId: String!) { getVehicle(id: $vehicleId) { chargingSchedules { startTime duration location { latitude longitude } amperage enabled weekDays } } }",
         },
       }),
   },
@@ -559,10 +570,10 @@ const endpoints: EndpointDef[] = [
     call: (c, ctx) =>
       c.vehicleInfo.getVehicle({
         body: {
-          operationName: "getVehicle",
+          operationName: "GetVehicle",
           variables: { getVehicleId: ctx.vehicleId! },
           query:
-            "query getVehicle($getVehicleId: String) { getVehicle(id: $getVehicleId) { invitedUsers { __typename firstName lastName email roles userId } } }",
+            "query GetVehicle($getVehicleId: String) { getVehicle(id: $getVehicleId) { __typename invitedUsers { __typename ... on ProvisionedUser { devices { __typename type mappedIdentityId id hrid deviceName isPaired isEnabled } firstName lastName email roles userId } ... on UnprovisionedUser { email inviteId status } } } }",
         },
       }),
   },
@@ -576,7 +587,7 @@ const endpoints: EndpointDef[] = [
           operationName: "getOTAUpdateDetails",
           variables: { vehicleId: ctx.vehicleId! },
           query:
-            "query getOTAUpdateDetails($vehicleId: String!) { getOTAUpdateDetails(vehicleId: $vehicleId) { url version locale } }",
+            "query getOTAUpdateDetails($vehicleId: String!) { getVehicle(id: $vehicleId) { availableOTAUpdateDetails { url version locale } currentOTAUpdateDetails { url version locale } } }",
         },
       }),
   },
@@ -587,11 +598,12 @@ const endpoints: EndpointDef[] = [
     call: (c, ctx) =>
       c.vehicleInfo.getEstimatedRange({
         body: {
-          operationName: "getEstimatedRange",
+          operationName: "GetEstimatedRange",
           variables: { vehicleId: ctx.vehicleId!, startSoc: 80 },
           query:
-            "query getEstimatedRange($vehicleId: String!, $startSoc: Float!, $driveMode: String, $trailerProfile: String) { getEstimatedRange(vehicleId: $vehicleId, startSoc: $startSoc, driveMode: $driveMode, trailerProfile: $trailerProfile) { conservativeRange { estimatedRangeMi estimatedRangeKm } } }",
+            "query GetEstimatedRange($vehicleId: String!, $startSoc: Float!, $driveMode: String, $trailerProfile: String) { getVehicle(id: $vehicleId) { __typename estimatedRange(startSoc: $startSoc driveMode: $driveMode trailerProfile: $trailerProfile) } }",
         },
+        headers: { "dc-cid": "m-android" },
       }),
   },
   {
@@ -602,7 +614,7 @@ const endpoints: EndpointDef[] = [
         body: {
           operationName: "SupportedFeatures",
           query:
-            "query SupportedFeatures { vehicleState { supportedFeatures { name status } } }",
+            "query SupportedFeatures { currentUser { vehicles { id vehicle { vehicleState { supportedFeatures { name status } } } } } }",
         },
       }),
   },
@@ -616,7 +628,7 @@ const endpoints: EndpointDef[] = [
         body: {
           operationName: "getSavedTrips",
           query:
-            "query getSavedTrips { getSavedTrips { id name startingSOC stops { name latitude longitude } driveMode departureTime } }",
+            "query getSavedTrips { getSavedTrips { id name startingSOC stops { name location { latitude longitude } targetArrivalSOCPercent type placeId { value dataProvider } } driveMode networkPreferences { networkId preference } trailerProfile avoidAdapterRequired createdAt updatedAt departureTime } }",
         },
       }),
   },
@@ -627,10 +639,10 @@ const endpoints: EndpointDef[] = [
     call: (c, ctx) =>
       c.tripPlanning.getTrailerProfiles({
         body: {
-          operationName: "getTrailerProfiles",
+          operationName: "GetTrailerProfiles",
           variables: { getVehicleId: ctx.vehicleId! },
           query:
-            "query getTrailerProfiles($getVehicleId: String) { getVehicle(id: $getVehicleId) { trailerProfiles { __typename rangeStatus weight onRoadEfficiency offRoadEfficiency name } } }",
+            "query GetTrailerProfiles($getVehicleId: String!) { getVehicle(id: $getVehicleId) { trailerProfiles { trailerDefault { __typename rangeStatus weight onRoadEfficiency offRoadEfficiency name } trailer1 { __typename rangeStatus weight onRoadEfficiency offRoadEfficiency name } trailer2 { __typename rangeStatus weight onRoadEfficiency offRoadEfficiency name } trailer3 { __typename rangeStatus weight onRoadEfficiency offRoadEfficiency name } } } }",
         },
       }),
   },
@@ -642,14 +654,19 @@ const endpoints: EndpointDef[] = [
     call: (c) =>
       c.gearShop.searchShopProductsBySkus({
         body: {
-          operationName: "searchShopProductsBySkus",
+          operationName: "SearchShopProductsBySkus",
           variables: {
             country: "US",
-            skus: ["RAN-1001"],
+            skus: ["ACERRCK001"],
             pageInfo: { from: 0, size: 5 },
           },
           query:
-            "query searchShopProductsBySkus($country: String, $skus: [String!]!, $pageInfo: PageInfoInput) { searchShopProductsBySkus(country: $country, skus: $skus, pageInfo: $pageInfo) { total data { sku title description price { amount currency } images { alt url } } } }",
+            'query SearchShopProductsBySkus($country: String! = "US", $skus: [String!]!, $pageInfo: ElasticSearchPageInput) { searchProducts(input: {storeType: ONLINE_STORE, country: $country, pageInfo: $pageInfo, filters: {skus: $skus}}) { total data { ... on ChildProduct { sku title price { listPrice { amount currency } } __typename } ... on StandaloneProduct { sku title price { listPrice { amount currency } } __typename } __typename } __typename } }',
+        },
+        headers: {
+          "csrf-token": "",
+          "dc-cid": "m-ios-rivian",
+          "x-datadog-origin": "rum",
         },
       }),
   },
@@ -659,14 +676,19 @@ const endpoints: EndpointDef[] = [
     call: (c) =>
       c.gearShop.searchShopPricingBySku({
         body: {
-          operationName: "searchShopPricingBySku",
+          operationName: "SearchShopPricingBySku",
           variables: {
             country: "US",
-            skus: ["RAN-1001"],
+            skus: ["ACERRCK001"],
             pageInfo: { from: 0, size: 5 },
           },
           query:
-            "query searchShopPricingBySku($country: String, $skus: [String!]!, $pageInfo: PageInfoInput) { searchShopPricingBySku(country: $country, skus: $skus, pageInfo: $pageInfo) { total data { sku title price { amount currency } } } }",
+            'query SearchShopPricingBySku($country: String! = "US", $skus: [String!]!, $pageInfo: ElasticSearchPageInput) { searchProducts(input: {storeType: ONLINE_STORE, country: $country, pageInfo: $pageInfo, filters: {skus: $skus}}) { total data { ... on ChildProduct { sku price { listPrice { amount currency } } __typename } ... on StandaloneProduct { sku price { listPrice { amount currency } } __typename } __typename } __typename } }',
+        },
+        headers: {
+          "csrf-token": "",
+          "dc-cid": "m-ios-rivian",
+          "x-datadog-origin": "rum",
         },
       }),
   },
@@ -699,10 +721,17 @@ async function main() {
     const orders = await rivian.account.searchOrders({
       body: {
         operationName: "searchOrders",
-        variables: { orderTypes: ["VEHICLE"], pageInfo: { from: 0, size: 1 } },
+        variables: {
+          orderTypes: ["VEHICLE"],
+          orderStates: null,
+          pageInfo: { from: 0, size: 1 },
+          dateRange: null,
+          sortFields: { orderDate: "DESC" },
+        },
         query:
-          "query searchOrders($orderTypes: [String], $pageInfo: PageInfoInput) { searchOrders(orderTypes: $orderTypes, pageInfo: $pageInfo) { data { id } } }",
+          "query searchOrders($input: UserOrderSearchInput!) { searchOrders(input: $input) { data { id } } }",
       },
+      headers: { "dc-cid": "m-ios-rivian" },
     });
     const orderList = (
       orders.data as {

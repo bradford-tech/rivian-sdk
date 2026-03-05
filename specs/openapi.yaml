@@ -830,30 +830,42 @@ components:
       type: object
       properties:
         isRivianCharger:
-          type: boolean
+          type: [boolean, "null"]
         isFreeSession:
-          type: boolean
+          type: [boolean, "null"]
         vehicleChargerState:
-          $ref: "#/components/schemas/TimestampedValue"
+          oneOf:
+            - $ref: "#/components/schemas/TimestampedValue"
+            - type: "null"
         chargerId:
-          type: string
+          type: [string, "null"]
         startTime:
-          type: string
+          type: [string, "null"]
           format: date-time
         timeElapsed:
-          type: string
+          type: [string, "null"]
         timeRemaining:
-          $ref: "#/components/schemas/TimestampedValue"
+          oneOf:
+            - $ref: "#/components/schemas/TimestampedValue"
+            - type: "null"
         kilometersChargedPerHour:
-          $ref: "#/components/schemas/TimestampedValue"
+          oneOf:
+            - $ref: "#/components/schemas/TimestampedValue"
+            - type: "null"
         power:
-          $ref: "#/components/schemas/TimestampedValue"
+          oneOf:
+            - $ref: "#/components/schemas/TimestampedValue"
+            - type: "null"
         rangeAddedThisSession:
-          $ref: "#/components/schemas/TimestampedValue"
+          oneOf:
+            - $ref: "#/components/schemas/TimestampedValue"
+            - type: "null"
         totalChargedEnergy:
-          $ref: "#/components/schemas/TimestampedValue"
+          oneOf:
+            - $ref: "#/components/schemas/TimestampedValue"
+            - type: "null"
         currentPrice:
-          type: number
+          type: [number, "null"]
 
     ChargingSchedule:
       type: object
@@ -1482,15 +1494,17 @@ paths:
                 type: object
                 properties:
                   data:
-                    type: object
-                    properties:
-                      orders:
-                        type: object
+                    oneOf:
+                      - type: object
                         properties:
-                          data:
-                            type: array
-                            items:
-                              $ref: "#/components/schemas/OrderSnapshot"
+                          orders:
+                            type: object
+                            properties:
+                              data:
+                                type: array
+                                items:
+                                  $ref: "#/components/schemas/OrderSnapshot"
+                      - type: "null"
 
   /gateway/graphql#delivery:
     post:
@@ -1837,10 +1851,12 @@ paths:
                               email:
                                 type: string
                           phone:
-                            type: object
-                            properties:
-                              formatted:
-                                type: string
+                            oneOf:
+                              - type: object
+                                properties:
+                                  formatted:
+                                    type: string
+                              - type: "null"
                           firstName:
                             type: string
                           lastName:
@@ -2481,10 +2497,12 @@ paths:
                         type: object
                         properties:
                           getLinkedEmailForRivianId:
-                            type: object
-                            properties:
-                              email:
-                                type: string
+                            oneOf:
+                              - type: object
+                                properties:
+                                  email:
+                                    type: [string, "null"]
+                              - type: "null"
 
   /gateway/graphql#ChargerDetails:
     post:
@@ -2631,9 +2649,11 @@ paths:
                         type: object
                         properties:
                           chargingSchedules:
-                            type: array
-                            items:
-                              $ref: "#/components/schemas/ChargingSchedule"
+                            oneOf:
+                              - type: array
+                                items:
+                                  $ref: "#/components/schemas/ChargingSchedule"
+                              - type: "null"
 
   # ── Vehicle Controls ────────────────────────────────────────
   /gateway/graphql#EnrollPhone:
@@ -3103,7 +3123,7 @@ paths:
                                       id:
                                         type: string
                                       hrid:
-                                        type: string
+                                        type: [string, "null"]
                                       deviceName:
                                         type: string
                                       isPaired:

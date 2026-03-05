@@ -393,18 +393,18 @@ export type ChargingSessionSummary = {
 };
 
 export type LiveSessionData = {
-    isRivianCharger?: boolean;
-    isFreeSession?: boolean;
-    vehicleChargerState?: TimestampedValue;
-    chargerId?: string;
-    startTime?: Date;
-    timeElapsed?: string;
-    timeRemaining?: TimestampedValue;
-    kilometersChargedPerHour?: TimestampedValue;
-    power?: TimestampedValue;
-    rangeAddedThisSession?: TimestampedValue;
-    totalChargedEnergy?: TimestampedValue;
-    currentPrice?: number;
+    isRivianCharger?: boolean | null;
+    isFreeSession?: boolean | null;
+    vehicleChargerState?: TimestampedValue | null;
+    chargerId?: string | null;
+    startTime?: Date | null;
+    timeElapsed?: string | null;
+    timeRemaining?: TimestampedValue | null;
+    kilometersChargedPerHour?: TimestampedValue | null;
+    power?: TimestampedValue | null;
+    rangeAddedThisSession?: TimestampedValue | null;
+    totalChargedEnergy?: TimestampedValue | null;
+    currentPrice?: number | null;
 };
 
 export type ChargingSchedule = {
@@ -753,7 +753,7 @@ export type VehicleOrdersResponses = {
             orders?: {
                 data?: Array<OrderSnapshot>;
             };
-        };
+        } | null;
     };
 };
 
@@ -949,7 +949,7 @@ export type UserResponses = {
                 };
                 phone?: {
                     formatted?: string;
-                };
+                } | null;
                 firstName?: string;
                 lastName?: string;
                 addresses?: Array<{
@@ -1336,8 +1336,8 @@ export type GetLinkedEmailForRivianIdResponses = {
         data?: {
             chargepoint?: {
                 getLinkedEmailForRivianId?: {
-                    email?: string;
-                };
+                    email?: string | null;
+                } | null;
             };
         };
     };
@@ -1424,7 +1424,7 @@ export type GetChargingScheduleResponses = {
     200: {
         data?: {
             getVehicle?: {
-                chargingSchedules?: Array<ChargingSchedule>;
+                chargingSchedules?: Array<ChargingSchedule> | null;
             };
         };
     };
@@ -1710,7 +1710,7 @@ export type GetVehicleResponses = {
                         type?: string;
                         mappedIdentityId?: string;
                         id?: string;
-                        hrid?: string;
+                        hrid?: string | null;
                         deviceName?: string;
                         isPaired?: boolean;
                         isEnabled?: boolean;

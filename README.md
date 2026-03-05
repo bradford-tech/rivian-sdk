@@ -138,99 +138,101 @@ const rivian = await createClient({
 
 The client exposes the following namespaces, each mapping to a group of API operations.
 
+**Status:** ● Validated against live API · ○ Not yet tested
+
 ### `rivian.auth`
 
 Hand-written auth layer. See [Authentication](#authentication) above.
 
-| Method                                | Description                                                                 |
-| ------------------------------------- | --------------------------------------------------------------------------- |
-| `login(email, password)`              | Authenticate with email and password. Returns `{ otpRequired, otpToken? }`. |
-| `verifyOtp(email, otpCode, otpToken)` | Complete MFA login with an OTP code.                                        |
-| `setTokens(tokens)`                   | Set tokens manually.                                                        |
-| `getTokens()`                         | Get current tokens.                                                         |
-| `logout()`                            | Clear all tokens from memory and storage.                                   |
-| `isAuthenticated`                     | `true` if all three session tokens are present.                             |
+| Method                                | Description                                                                 | Status |
+| ------------------------------------- | --------------------------------------------------------------------------- | ------ |
+| `login(email, password)`              | Authenticate with email and password. Returns `{ otpRequired, otpToken? }`. | ●     |
+| `verifyOtp(email, otpCode, otpToken)` | Complete MFA login with an OTP code.                                        | ●     |
+| `setTokens(tokens)`                   | Set tokens manually.                                                        | ○      |
+| `getTokens()`                         | Get current tokens.                                                         | ○      |
+| `logout()`                            | Clear all tokens from memory and storage.                                   | ○      |
+| `isAuthenticated`                     | `true` if all three session tokens are present.                             | ●     |
 
 ### `rivian.account`
 
-| Method                         | Description                    |
-| ------------------------------ | ------------------------------ |
-| `getUserInfo()`                | Get user account information   |
-| `currentUserForLogin()`        | Get current user configuration |
-| `vehicleOrders()`              | List vehicle orders            |
-| `delivery()`                   | Get delivery information       |
-| `order()`                      | Get order details              |
-| `searchOrders()`               | Search retail orders           |
-| `user()`                       | Get user info for orders       |
-| `paymentMethods()`             | Get payment methods            |
-| `transactionStatus()`          | Get transaction status         |
-| `financeSummary()`             | Get finance summary            |
-| `getProvisionedCampSpeakers()` | List provisioned camp speakers |
-| `getRegisteredWallboxes()`     | List registered wallboxes      |
+| Method                         | Description                    | Status |
+| ------------------------------ | ------------------------------ | ------ |
+| `getUserInfo()`                | Get user account information   | ●     |
+| `currentUserForLogin()`        | Get current user configuration | ●     |
+| `vehicleOrders()`              | List vehicle orders            | ○     |
+| `delivery()`                   | Get delivery information       | ○      |
+| `order()`                      | Get order details              | ○      |
+| `searchOrders()`               | Search retail orders           | ●     |
+| `user()`                       | Get user info for orders       | ●     |
+| `paymentMethods()`             | Get payment methods            | ●     |
+| `transactionStatus()`          | Get transaction status         | ○      |
+| `financeSummary()`             | Get finance summary            | ○      |
+| `getProvisionedCampSpeakers()` | List provisioned camp speakers | ●     |
+| `getRegisteredWallboxes()`     | List registered wallboxes      | ●     |
 
 ### `rivian.charging`
 
-| Method                           | Description                       |
-| -------------------------------- | --------------------------------- |
-| `getLiveSessionData()`           | Get live charging session data    |
-| `getLiveSessionHistory()`        | Get live charging session history |
-| `getCompletedSessionSummaries()` | Get completed session summaries   |
-| `getNonRivianUserSession()`      | Get non-Rivian charging session   |
-| `getChargingSchedule()`          | Get charging schedule             |
-| `setChargingSchedule()`          | Set charging schedule             |
-| `getWallboxStatus()`             | Get wallbox status                |
-| `updateWallbox()`                | Update wallbox name               |
-| `chargerDetails()`               | Get charger details               |
-| `checkByRivianId()`              | Check linked third-party accounts |
-| `getLinkedEmailForRivianId()`    | Get linked third-party email      |
+| Method                           | Description                       | Status |
+| -------------------------------- | --------------------------------- | ------ |
+| `getCompletedSessionSummaries()` | Get completed session summaries   | ●     |
+| `getLiveSessionData()`           | Get live charging session data    | ●     |
+| `getLiveSessionHistory()`        | Get live charging session history | ●     |
+| `getNonRivianUserSession()`      | Get non-Rivian charging session   | ●     |
+| `checkByRivianId()`              | Check linked third-party accounts | ●     |
+| `getLinkedEmailForRivianId()`    | Get linked third-party email      | ●     |
+| `getChargingSchedule()`          | Get charging schedule             | ●     |
+| `getWallboxStatus()`             | Get wallbox status                | ○      |
+| `setChargingSchedule()`          | Set charging schedule             | ○      |
+| `updateWallbox()`                | Update wallbox name               | ○      |
+| `chargerDetails()`               | Get charger details               | ○      |
 
 ### `rivian.vehicleInfo`
 
-| Method                            | Description                      |
-| --------------------------------- | -------------------------------- |
-| `getVehicle()`                    | Get vehicle details              |
-| `getVehicleState()`               | Get vehicle state                |
-| `getVehicleLastConnection()`      | Get last cloud connection time   |
-| `getOtaUpdateDetails()`           | Get OTA update details           |
-| `getVehicleImages()`              | Get vehicle images               |
-| `getVehicleWheelImage()`          | Get wheel image                  |
-| `getEstimatedRange()`             | Get estimated range              |
-| `setVehicleName()`                | Set vehicle name                 |
-| `supportedFeatures()`             | Get supported features           |
-| `registerPushNotificationToken()` | Register push notification token |
+| Method                            | Description                      | Status |
+| --------------------------------- | -------------------------------- | ------ |
+| `getVehicleState()`               | Get vehicle state                | ●     |
+| `getVehicleLastConnection()`      | Get last cloud connection time   | ●     |
+| `getVehicle()`                    | Get vehicle details              | ●     |
+| `getOtaUpdateDetails()`           | Get OTA update details           | ●     |
+| `getEstimatedRange()`             | Get estimated range              | ●     |
+| `supportedFeatures()`             | Get supported features           | ●     |
+| `getVehicleImages()`              | Get vehicle images               | ○      |
+| `getVehicleWheelImage()`          | Get wheel image                  | ○      |
+| `setVehicleName()`                | Set vehicle name                 | ○      |
+| `registerPushNotificationToken()` | Register push notification token | ○      |
 
 ### `rivian.vehicleControls`
 
-| Method                             | Description                     |
-| ---------------------------------- | ------------------------------- |
-| `sendVehicleCommand()`             | Send a command to the vehicle   |
-| `getVehicleCommand()`              | Get command status              |
-| `enrollPhone()`                    | Enroll a phone key              |
-| `disenrollPhone()`                 | Disenroll a phone key           |
-| `parseAndShareLocationToVehicle()` | Share a location to the vehicle |
+| Method                             | Description                     | Status |
+| ---------------------------------- | ------------------------------- | ------ |
+| `sendVehicleCommand()`             | Send a command to the vehicle   | ○      |
+| `getVehicleCommand()`              | Get command status              | ○      |
+| `enrollPhone()`                    | Enroll a phone key              | ○      |
+| `disenrollPhone()`                 | Disenroll a phone key           | ○      |
+| `parseAndShareLocationToVehicle()` | Share a location to the vehicle | ○      |
 
 ### `rivian.tripPlanning`
 
-| Method                 | Description                     |
-| ---------------------- | ------------------------------- |
-| `places()`             | Search for places               |
-| `planTrip()`           | Plan a trip with charging stops |
-| `saveTrip()`           | Save a trip                     |
-| `getSavedTrips()`      | Get saved trips                 |
-| `getTrailerProfiles()` | Get trailer towing profiles     |
+| Method                 | Description                     | Status |
+| ---------------------- | ------------------------------- | ------ |
+| `getSavedTrips()`      | Get saved trips                 | ●     |
+| `getTrailerProfiles()` | Get trailer towing profiles     | ●     |
+| `places()`             | Search for places               | ○      |
+| `planTrip()`           | Plan a trip with charging stops | ○      |
+| `saveTrip()`           | Save a trip                     | ○      |
 
 ### `rivian.gearShop`
 
-| Method                       | Description                      |
-| ---------------------------- | -------------------------------- |
-| `searchShopProductsBySkus()` | Search gear shop products by SKU |
-| `searchShopPricingBySku()`   | Get pricing for a gear shop item |
+| Method                       | Description                      | Status |
+| ---------------------------- | -------------------------------- | ------ |
+| `searchShopProductsBySkus()` | Search gear shop products by SKU | ●     |
+| `searchShopPricingBySku()`   | Get pricing for a gear shop item | ●     |
 
 ### `rivian.configurator`
 
-| Method                   | Description                      |
-| ------------------------ | -------------------------------- |
-| `getConfiguratorImage()` | Get a vehicle configurator image |
+| Method                   | Description                      | Status |
+| ------------------------ | -------------------------------- | ------ |
+| `getConfiguratorImage()` | Get a vehicle configurator image | ○      |
 
 ## How It Works
 
