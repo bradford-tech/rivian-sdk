@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.5](https://github.com/bradford-tech/rivian-sdk/compare/rivian-sdk-v0.0.4...rivian-sdk-v0.0.5) (2026-03-05)
+
+
+### Bug Fixes
+
+* **release:** use Node 24 for npm trusted publishing ([e5fb5f9](https://github.com/bradford-tech/rivian-sdk/commit/e5fb5f9d365a888f027a1bf6fd2d955141bbfcdb))
+
 ## [0.0.4](https://github.com/bradford-tech/rivian-sdk/compare/rivian-sdk-v0.0.3...rivian-sdk-v0.0.4) (2026-03-05)
 
 
